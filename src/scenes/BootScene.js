@@ -4,34 +4,32 @@ class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    // Generate all game assets programmatically (no external files needed)
-    this.generateAssets();
-  }
-
-  create() {
-    this.scene.start('PreloadScene');
-  }
-
-  generateAssets() {
+    // Generate original assets only - creature sprites generated in create()
     const T = GAME_CONFIG.TILE_SIZE;
-
-    // --- TILESET ---
     this.generateTileset(T);
-
-    // --- CHARACTER SPRITES ---
-    this.generateCharacterSprite('player', [0x4488cc, 0x2266aa, 0xffcc88]); // blue outfit
-    this.generateCharacterSprite('npc-lou', [0xf0f0f0, 0xd0d0d0, 0xffcc88]); // white dress
-    this.generateCharacterSprite('npc-ben', [0x2a2a2a, 0x1a1a1a, 0xffcc88]); // black suit
-    this.generateCharacterSprite('npc-bestman', [0x446688, 0x335577, 0xdeb887]); // blue suit
-    this.generateCharacterSprite('npc-moh', [0xcc6688, 0xaa4466, 0xffcc88]); // pink dress
-    this.generateCharacterSprite('npc-grandma', [0x9988aa, 0x776688, 0xffd8b0]); // purple outfit
-
-    // --- UI ELEMENTS ---
+    this.generateCharacterSprite('player', [0x4488cc, 0x2266aa, 0xffcc88]);
+    this.generateCharacterSprite('npc-lou', [0xf0f0f0, 0xd0d0d0, 0xffcc88]);
+    this.generateCharacterSprite('npc-ben', [0x2a2a2a, 0x1a1a1a, 0xffcc88]);
+    this.generateCharacterSprite('npc-bestman', [0x446688, 0x335577, 0xdeb887]);
+    this.generateCharacterSprite('npc-moh', [0xcc6688, 0xaa4466, 0xffcc88]);
+    this.generateCharacterSprite('npc-grandma', [0x9988aa, 0x776688, 0xffd8b0]);
     this.generateDialogueBox();
     this.generateBattleBG();
     this.generateQuestIndicators();
     this.generateInteractableSprites();
     this.generateTitleBG();
+  }
+
+  create() {
+    // Generate new Pokemon-themed assets in create() to avoid preload hanging
+    this.generateCreatureSprites();
+    this.generateBadgeSprites();
+    this.generateBattlePlatforms();
+    this.scene.start('PreloadScene');
+  }
+
+  generateAssets() {
+    // Split between preload() and create() - this method is no longer used
   }
 
   generateTileset(T) {
@@ -685,5 +683,447 @@ class BootScene extends Phaser.Scene {
     ctx.fillRect(x - s/2, y, s * 2 - 1, s);
     ctx.fillRect(x - s/2 + 1, y + s, s * 2 - 3, s/2);
     ctx.fillRect(x, y + s + s/2, 1, 1);
+  }
+
+  generateCreatureSprites() {
+    // Use Phaser Graphics to generate creature textures (works in WebGL)
+    const creatures = [
+      { key: 'creature-ringbear-small', color: 0x8B6914, accent: 0xFFD700, detail: 0xA07818 },
+      { key: 'creature-bouquettle-small', color: 0x44AA33, accent: 0xFF6688, detail: 0x228811 },
+      { key: 'creature-cakemon-small', color: 0xF8F0E8, accent: 0xFF8888, detail: 0xFF4444 },
+      { key: 'creature-veileon-small', color: 0xE8E0F0, accent: 0xFFDD88, detail: 0x6644AA },
+      { key: 'creature-dovelett-small', color: 0xF0F0F0, accent: 0xFF6688, detail: 0xFFAA44 },
+      { key: 'creature-dancelf-small', color: 0xFFB8D8, accent: 0xFFD700, detail: 0xFF88BB },
+      { key: 'creature-toastini-small', color: 0xDDEEFF, accent: 0xFFDD44, detail: 0xFFEE66 },
+      { key: 'creature-confettail-small', color: 0xFF8844, accent: 0xFFDD44, detail: 0x44AAFF },
+    ];
+
+    creatures.forEach(c => {
+      const g = this.make.graphics({ x: 0, y: 0, add: false });
+      // Body
+      g.fillStyle(c.color);
+      g.fillRect(4, 6, 8, 8);
+      // Head
+      g.fillRect(3, 2, 10, 6);
+      // Eyes
+      g.fillStyle(0x000000);
+      g.fillRect(5, 4, 1, 1);
+      g.fillRect(9, 4, 1, 1);
+      // Accent (ears/wings/decoration)
+      g.fillStyle(c.accent);
+      g.fillRect(3, 1, 3, 2);
+      g.fillRect(10, 1, 3, 2);
+      // Detail
+      g.fillStyle(c.detail);
+      g.fillRect(6, 6, 4, 2);
+      // Feet
+      g.fillStyle(c.color);
+      g.fillRect(4, 13, 3, 2);
+      g.fillRect(9, 13, 3, 2);
+      g.generateTexture(c.key, 16, 16);
+      g.destroy();
+    });
+  }
+
+  drawRingbear(ctx, x, y, S) {
+    // A cute bear holding wedding rings
+    const cx = x + S/2, cy = y + S/2;
+    // Body
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(x+14, y+20, 20, 22);
+    // Head
+    ctx.fillStyle = '#A07818';
+    ctx.fillRect(x+12, y+6, 24, 18);
+    // Ears
+    ctx.fillRect(x+10, y+4, 8, 8);
+    ctx.fillRect(x+30, y+4, 8, 8);
+    ctx.fillStyle = '#C89028';
+    ctx.fillRect(x+12, y+6, 4, 4);
+    ctx.fillRect(x+32, y+6, 4, 4);
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+18, y+12, 3, 3);
+    ctx.fillRect(x+27, y+12, 3, 3);
+    // Nose
+    ctx.fillStyle = '#5a3a0a';
+    ctx.fillRect(x+22, y+16, 4, 3);
+    // Mouth
+    ctx.fillRect(x+21, y+19, 2, 1);
+    ctx.fillRect(x+25, y+19, 2, 1);
+    // Arms holding rings
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(x+8, y+22, 8, 4);
+    ctx.fillRect(x+32, y+22, 8, 4);
+    // Legs
+    ctx.fillRect(x+14, y+40, 8, 6);
+    ctx.fillRect(x+26, y+40, 8, 6);
+    // Wedding rings (gold circles)
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x+6, y+20, 6, 6);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+8, y+22, 2, 2);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x+36, y+20, 6, 6);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+38, y+22, 2, 2);
+    // Ring gems
+    ctx.fillStyle = '#88CCFF';
+    ctx.fillRect(x+7, y+19, 4, 2);
+    ctx.fillStyle = '#FF88AA';
+    ctx.fillRect(x+37, y+19, 4, 2);
+  }
+
+  drawBouquettle(ctx, x, y, S) {
+    // A turtle with a flower bouquet shell
+    // Shell/body
+    ctx.fillStyle = '#44AA33';
+    ctx.fillRect(x+12, y+22, 24, 16);
+    ctx.fillStyle = '#338822';
+    ctx.fillRect(x+14, y+24, 20, 12);
+    // Head
+    ctx.fillStyle = '#66BB55';
+    ctx.fillRect(x+8, y+26, 10, 10);
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+10, y+28, 2, 2);
+    // Legs
+    ctx.fillStyle = '#66BB55';
+    ctx.fillRect(x+14, y+38, 6, 6);
+    ctx.fillRect(x+28, y+38, 6, 6);
+    // Flowers on shell (bouquet)
+    ctx.fillStyle = '#FF6688';
+    ctx.fillRect(x+16, y+14, 6, 6);
+    ctx.fillRect(x+26, y+16, 5, 5);
+    ctx.fillStyle = '#FFAACC';
+    ctx.fillRect(x+20, y+12, 6, 6);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x+14, y+18, 4, 4);
+    ctx.fillRect(x+30, y+14, 4, 4);
+    ctx.fillStyle = '#FFDD44';
+    ctx.fillRect(x+22, y+10, 4, 4);
+    // Stems
+    ctx.fillStyle = '#228811';
+    ctx.fillRect(x+18, y+20, 2, 4);
+    ctx.fillRect(x+24, y+18, 2, 6);
+    ctx.fillRect(x+28, y+20, 2, 4);
+    // Tail
+    ctx.fillStyle = '#66BB55';
+    ctx.fillRect(x+36, y+30, 6, 4);
+  }
+
+  drawCakemon(ctx, x, y, S) {
+    // A sentient wedding cake creature
+    // Bottom tier
+    ctx.fillStyle = '#F8F0E8';
+    ctx.fillRect(x+8, y+30, 32, 14);
+    ctx.fillStyle = '#FFE0D0';
+    ctx.fillRect(x+10, y+32, 28, 10);
+    // Middle tier
+    ctx.fillStyle = '#F8F0E8';
+    ctx.fillRect(x+14, y+20, 20, 12);
+    // Top tier
+    ctx.fillStyle = '#F8F0E8';
+    ctx.fillRect(x+18, y+12, 12, 10);
+    // Frosting decorations
+    ctx.fillStyle = '#FF8888';
+    ctx.fillRect(x+8, y+30, 32, 2);
+    ctx.fillRect(x+14, y+20, 20, 2);
+    ctx.fillRect(x+18, y+12, 12, 2);
+    // Eyes (on middle tier)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+18, y+24, 3, 3);
+    ctx.fillRect(x+27, y+24, 3, 3);
+    // Happy mouth
+    ctx.fillStyle = '#FF6666';
+    ctx.fillRect(x+21, y+28, 6, 2);
+    ctx.fillRect(x+22, y+29, 4, 1);
+    // Cherry/heart on top
+    ctx.fillStyle = '#FF4444';
+    ctx.fillRect(x+22, y+8, 4, 4);
+    ctx.fillRect(x+21, y+9, 6, 2);
+    // Little arms
+    ctx.fillStyle = '#F0E0D0';
+    ctx.fillRect(x+4, y+32, 6, 4);
+    ctx.fillRect(x+38, y+32, 6, 4);
+    // Feet
+    ctx.fillRect(x+12, y+44, 6, 3);
+    ctx.fillRect(x+30, y+44, 6, 3);
+  }
+
+  drawVeileon(ctx, x, y, S) {
+    // An elegant veil/ribbon creature
+    // Body
+    ctx.fillStyle = '#E8E0F0';
+    ctx.fillRect(x+18, y+16, 12, 20);
+    // Head
+    ctx.fillStyle = '#F0E8F8';
+    ctx.fillRect(x+16, y+8, 16, 12);
+    // Eyes
+    ctx.fillStyle = '#6644AA';
+    ctx.fillRect(x+19, y+12, 3, 3);
+    ctx.fillRect(x+28, y+12, 3, 3);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+20, y+13, 1, 1);
+    ctx.fillRect(x+29, y+13, 1, 1);
+    // Veil flowing from head
+    ctx.fillStyle = '#FFFFFF88';
+    ctx.fillRect(x+14, y+6, 20, 4);
+    ctx.fillStyle = '#FFFFFFAA';
+    ctx.fillRect(x+10, y+8, 6, 20);
+    ctx.fillRect(x+32, y+8, 6, 20);
+    ctx.fillStyle = '#FFFFFF66';
+    ctx.fillRect(x+8, y+14, 4, 22);
+    ctx.fillRect(x+36, y+14, 4, 22);
+    // Sparkles on veil
+    ctx.fillStyle = '#FFDD88';
+    ctx.fillRect(x+12, y+12, 2, 2);
+    ctx.fillRect(x+34, y+10, 2, 2);
+    ctx.fillRect(x+10, y+24, 2, 2);
+    ctx.fillRect(x+36, y+22, 2, 2);
+    // Tail/ribbon
+    ctx.fillStyle = '#D8D0E8';
+    ctx.fillRect(x+20, y+36, 8, 8);
+    ctx.fillRect(x+18, y+40, 4, 6);
+    ctx.fillRect(x+28, y+40, 4, 6);
+  }
+
+  drawDovelett(ctx, x, y, S) {
+    // A love dove
+    // Body
+    ctx.fillStyle = '#F0F0F0';
+    ctx.fillRect(x+14, y+20, 20, 16);
+    ctx.fillStyle = '#E0E0E0';
+    ctx.fillRect(x+16, y+22, 16, 12);
+    // Head
+    ctx.fillStyle = '#F8F8F8';
+    ctx.fillRect(x+18, y+10, 14, 12);
+    // Beak
+    ctx.fillStyle = '#FFAA44';
+    ctx.fillRect(x+14, y+14, 6, 4);
+    ctx.fillRect(x+12, y+15, 4, 2);
+    // Eye
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+22, y+13, 2, 2);
+    // Wings
+    ctx.fillStyle = '#E8E8E8';
+    ctx.fillRect(x+6, y+20, 10, 12);
+    ctx.fillRect(x+32, y+20, 10, 12);
+    ctx.fillStyle = '#D0D0D0';
+    ctx.fillRect(x+4, y+24, 8, 6);
+    ctx.fillRect(x+36, y+24, 8, 6);
+    // Tail
+    ctx.fillStyle = '#E0E0E0';
+    ctx.fillRect(x+20, y+36, 8, 6);
+    ctx.fillRect(x+18, y+38, 4, 6);
+    ctx.fillRect(x+28, y+38, 4, 6);
+    // Heart held in beak
+    ctx.fillStyle = '#FF6688';
+    ctx.fillRect(x+10, y+12, 4, 3);
+    ctx.fillRect(x+13, y+12, 4, 3);
+    ctx.fillRect(x+11, y+14, 5, 2);
+    ctx.fillRect(x+12, y+16, 3, 1);
+    // Feet
+    ctx.fillStyle = '#FFAA44';
+    ctx.fillRect(x+18, y+36, 4, 4);
+    ctx.fillRect(x+28, y+36, 4, 4);
+  }
+
+  drawDancelf(ctx, x, y, S) {
+    // A dancing fairy/elf creature
+    ctx.fillStyle = '#FFB8D8';
+    ctx.fillRect(x+18, y+18, 12, 16);
+    // Head
+    ctx.fillStyle = '#FFD0E0';
+    ctx.fillRect(x+16, y+8, 16, 12);
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+19, y+12, 2, 2);
+    ctx.fillRect(x+27, y+12, 2, 2);
+    // Smile
+    ctx.fillStyle = '#FF6688';
+    ctx.fillRect(x+22, y+16, 4, 1);
+    // Crown/tiara
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x+17, y+6, 14, 3);
+    ctx.fillRect(x+19, y+4, 2, 3);
+    ctx.fillRect(x+23, y+3, 2, 4);
+    ctx.fillRect(x+27, y+4, 2, 3);
+    // Arms (dancing pose)
+    ctx.fillStyle = '#FFB8D8';
+    ctx.fillRect(x+8, y+16, 10, 4);
+    ctx.fillRect(x+30, y+16, 10, 4);
+    ctx.fillRect(x+6, y+12, 4, 6);
+    ctx.fillRect(x+38, y+12, 4, 6);
+    // Dress/skirt
+    ctx.fillStyle = '#FF88BB';
+    ctx.fillRect(x+14, y+32, 20, 8);
+    ctx.fillRect(x+12, y+36, 24, 6);
+    // Sparkles
+    ctx.fillStyle = '#FFEE88';
+    ctx.fillRect(x+10, y+10, 2, 2);
+    ctx.fillRect(x+36, y+8, 2, 2);
+    ctx.fillRect(x+8, y+30, 2, 2);
+    ctx.fillRect(x+38, y+28, 2, 2);
+    // Feet
+    ctx.fillStyle = '#FFD0E0';
+    ctx.fillRect(x+16, y+42, 6, 4);
+    ctx.fillRect(x+26, y+42, 6, 4);
+  }
+
+  drawToastini(ctx, x, y, S) {
+    // A champagne toast creature
+    // Glass body
+    ctx.fillStyle = '#DDEEFF';
+    ctx.fillRect(x+16, y+8, 16, 24);
+    ctx.fillStyle = '#CCDDEE';
+    ctx.fillRect(x+18, y+10, 12, 20);
+    // Champagne inside
+    ctx.fillStyle = '#FFDD44';
+    ctx.fillRect(x+18, y+16, 12, 14);
+    ctx.fillStyle = '#FFEE66';
+    ctx.fillRect(x+20, y+18, 8, 10);
+    // Bubbles
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x+20, y+18, 2, 2);
+    ctx.fillRect(x+25, y+20, 2, 2);
+    ctx.fillRect(x+22, y+14, 2, 2);
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+20, y+22, 2, 2);
+    ctx.fillRect(x+26, y+22, 2, 2);
+    // Smile
+    ctx.fillStyle = '#FF8844';
+    ctx.fillRect(x+22, y+26, 4, 1);
+    // Stem
+    ctx.fillStyle = '#CCDDEE';
+    ctx.fillRect(x+22, y+32, 4, 6);
+    // Base
+    ctx.fillRect(x+16, y+38, 16, 4);
+    ctx.fillRect(x+14, y+40, 20, 4);
+    // Little arms
+    ctx.fillStyle = '#DDEEFF';
+    ctx.fillRect(x+8, y+20, 8, 4);
+    ctx.fillRect(x+32, y+20, 8, 4);
+    // Fizz particles above
+    ctx.fillStyle = '#FFEE88';
+    ctx.fillRect(x+20, y+4, 2, 2);
+    ctx.fillRect(x+26, y+6, 2, 2);
+    ctx.fillRect(x+18, y+2, 2, 2);
+    ctx.fillRect(x+28, y+3, 2, 2);
+  }
+
+  drawConfettail(ctx, x, y, S) {
+    // A confetti fox/cat creature
+    // Body
+    ctx.fillStyle = '#FF8844';
+    ctx.fillRect(x+14, y+22, 20, 14);
+    // Head
+    ctx.fillStyle = '#FFAA66';
+    ctx.fillRect(x+12, y+10, 20, 14);
+    // Ears (pointed)
+    ctx.fillStyle = '#FF8844';
+    ctx.fillRect(x+12, y+4, 6, 8);
+    ctx.fillRect(x+28, y+4, 6, 8);
+    ctx.fillStyle = '#FFD0A0';
+    ctx.fillRect(x+14, y+6, 2, 4);
+    ctx.fillRect(x+30, y+6, 2, 4);
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(x+16, y+14, 3, 3);
+    ctx.fillRect(x+25, y+14, 3, 3);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x+17, y+14, 1, 1);
+    ctx.fillRect(x+26, y+14, 1, 1);
+    // Nose
+    ctx.fillStyle = '#CC4422';
+    ctx.fillRect(x+20, y+18, 4, 2);
+    // Whiskers
+    ctx.fillStyle = '#CC8844';
+    ctx.fillRect(x+6, y+16, 8, 1);
+    ctx.fillRect(x+30, y+16, 8, 1);
+    ctx.fillRect(x+8, y+19, 6, 1);
+    ctx.fillRect(x+30, y+19, 6, 1);
+    // Legs
+    ctx.fillStyle = '#FF8844';
+    ctx.fillRect(x+14, y+36, 6, 8);
+    ctx.fillRect(x+28, y+36, 6, 8);
+    // Confetti tail (multi-colored)
+    ctx.fillStyle = '#FF4444';
+    ctx.fillRect(x+34, y+18, 6, 4);
+    ctx.fillStyle = '#44AAFF';
+    ctx.fillRect(x+38, y+14, 6, 4);
+    ctx.fillStyle = '#FFDD44';
+    ctx.fillRect(x+40, y+20, 6, 4);
+    ctx.fillStyle = '#44DD44';
+    ctx.fillRect(x+36, y+22, 6, 4);
+    ctx.fillStyle = '#FF88FF';
+    ctx.fillRect(x+42, y+16, 4, 4);
+    // Confetti spots on body
+    ctx.fillStyle = '#FF4444';
+    ctx.fillRect(x+16, y+24, 2, 2);
+    ctx.fillStyle = '#44AAFF';
+    ctx.fillRect(x+28, y+26, 2, 2);
+    ctx.fillStyle = '#FFDD44';
+    ctx.fillRect(x+20, y+30, 2, 2);
+  }
+
+  generateBadgeSprites() {
+    const S = 16;
+    const badges = [
+      { key: 'badge-bouquet', color1: 0xFF6688, color2: 0xFF88AA },
+      { key: 'badge-trivia', color1: 0x4488FF, color2: 0x66AAFF },
+      { key: 'badge-ring', color1: 0xFFD700, color2: 0xFFEE88 },
+      { key: 'badge-memory', color1: 0xAA66CC, color2: 0xCC88EE },
+    ];
+
+    badges.forEach(b => {
+      const g = this.make.graphics({ x: 0, y: 0, add: false });
+      g.fillStyle(b.color1);
+      g.fillRect(4, 1, 8, 14);
+      g.fillRect(1, 4, 14, 8);
+      g.fillRect(2, 2, 12, 12);
+      g.fillStyle(b.color2);
+      g.fillRect(5, 4, 6, 8);
+      g.fillRect(4, 5, 8, 6);
+      g.fillStyle(0xFFFFFF);
+      g.fillRect(6, 6, 4, 4);
+      g.generateTexture(b.key, S, S);
+      g.destroy();
+    });
+
+    // Locked badge
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    g.fillStyle(0x555555);
+    g.fillRect(4, 1, 8, 14);
+    g.fillRect(1, 4, 14, 8);
+    g.fillRect(2, 2, 12, 12);
+    g.fillStyle(0x666666);
+    g.fillRect(5, 4, 6, 8);
+    g.fillRect(4, 5, 8, 6);
+    g.fillStyle(0x777777);
+    g.fillRect(6, 6, 4, 4);
+    g.generateTexture('badge-locked', S, S);
+    g.destroy();
+  }
+
+  generateBattlePlatforms() {
+    // Player platform
+    const g1 = this.make.graphics({ x: 0, y: 0, add: false });
+    g1.fillStyle(0x4a8c3f);
+    g1.fillRect(8, 4, 64, 12);
+    g1.fillRect(4, 6, 72, 8);
+    g1.fillStyle(0x3a7c2f);
+    g1.fillRect(10, 8, 60, 8);
+    g1.generateTexture('battle-platform-player', 80, 20);
+    g1.destroy();
+
+    // Enemy platform
+    const g2 = this.make.graphics({ x: 0, y: 0, add: false });
+    g2.fillStyle(0x4a8c3f);
+    g2.fillRect(6, 3, 52, 10);
+    g2.fillStyle(0x3a7c2f);
+    g2.fillRect(8, 7, 48, 6);
+    g2.generateTexture('battle-platform-enemy', 64, 16);
+    g2.destroy();
   }
 }

@@ -25,6 +25,8 @@ const game = new Phaser.Game({
     BattleScene,
     GuestbookScene,
     CreditsScene,
+    PokedexScene,
+    TrainerCardScene,
   ],
   backgroundColor: GAME_CONFIG.COLORS.DARK,
 });

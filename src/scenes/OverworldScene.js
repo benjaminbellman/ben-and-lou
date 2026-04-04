@@ -45,8 +45,17 @@ class OverworldScene extends Phaser.Scene {
 
     this.dialogueManager.setQuestManager(this.questManager);
 
+    // Pokedex & Badge systems
+    this.pokedexManager = new PokedexManager();
+    this.badgeManager = new BadgeManager();
+
     // Load game data
     this.loadGameData();
+    this.loadCreatureData();
+
+    // Creature encounter spots on the map
+    this.creatureSpots = [];
+    this.createCreatureEncounters();
 
     // Quest log
     this.questLog = new QuestLog(this, this.questManager);
@@ -56,11 +65,28 @@ class OverworldScene extends Phaser.Scene {
       }
     });
 
+    // Pokedex (P key)
+    this.input.keyboard.on('keydown-P', () => {
+      if (!this.dialogueManager.isActive && !this.questLog.isVisible) {
+        this.openPokedex();
+      }
+    });
+
+    // Trainer Card (T key)
+    this.input.keyboard.on('keydown-T', () => {
+      if (!this.dialogueManager.isActive && !this.questLog.isVisible) {
+        this.openTrainerCard();
+      }
+    });
+
     // Touch controls
     this.touchControls = new TouchControls(this, this.inputManager);
 
-    // Quest update handler
-    this.questManager.onQuestUpdate = () => this.updateNPCIndicators();
+    // Quest update handler - also award badges
+    this.questManager.onQuestUpdate = () => {
+      this.updateNPCIndicators();
+      this.checkBadges();
+    };
 
     // Load save if applicable
     if (this.loadSave) {
@@ -68,8 +94,13 @@ class OverworldScene extends Phaser.Scene {
       if (save) {
         this.player.setPosition(save.playerX || 14 * T, save.playerY || 20 * T);
         this.questManager.loadState(save);
+        if (save.pokedex) this.pokedexManager.loadState(save.pokedex);
+        if (save.badges) this.badgeManager.loadState(save.badges);
         if (save.collectedItems) {
           this.removeCollectedItems(save.collectedItems);
+        }
+        if (save.discoveredCreatureSpots) {
+          this.removeDiscoveredCreatureSpots(save.discoveredCreatureSpots);
         }
       }
     }
@@ -483,8 +514,15 @@ class OverworldScene extends Phaser.Scene {
       return;
     }
 
+    if (this.isInteracting) return;
+
     // Player movement
     this.player.update(this.inputManager);
+
+    // Check creature encounters when player moves to a new tile
+    if (!this.player.isMoving()) {
+      this.checkCreatureEncounter();
+    }
 
     // Interaction check
     if (this.inputManager.isActionJustPressed() && !this.player.isMoving()) {
@@ -556,24 +594,173 @@ class OverworldScene extends Phaser.Scene {
     });
   }
 
+  loadCreatureData() {
+    const creatures = [
+      { id: 'ringbear', name: 'Ringbear', type: 'Love', spriteKey: 'creature-ringbear', description: 'A loyal bear that guards wedding rings with its life.' },
+      { id: 'bouquettle', name: 'Bouquettle', type: 'Grass', spriteKey: 'creature-bouquettle', description: 'A gentle turtle with flowers blooming on its shell.' },
+      { id: 'cakemon', name: 'Cakemon', type: 'Sweet', spriteKey: 'creature-cakemon', description: 'A living wedding cake that brings sweetness wherever it goes.' },
+      { id: 'veileon', name: 'Veileon', type: 'Fairy', spriteKey: 'creature-veileon', description: 'An ethereal creature draped in flowing wedding veils.' },
+      { id: 'dovelett', name: 'Dovelett', type: 'Flying', spriteKey: 'creature-dovelett', description: 'A dove of love that carries hearts in its beak.' },
+      { id: 'dancelf', name: 'Dancelf', type: 'Fairy', spriteKey: 'creature-dancelf', description: 'A tiny dancer that appears at joyful celebrations.' },
+      { id: 'toastini', name: 'Toastini', type: 'Bubbly', spriteKey: 'creature-toastini', description: 'A champagne glass creature that fizzes with excitement.' },
+      { id: 'confettail', name: 'Confettail', type: 'Party', spriteKey: 'creature-confettail', description: 'A festive fox whose tail bursts with colorful confetti.' },
+    ];
+    this.pokedexManager.loadCreatures(creatures);
+  }
+
+  createCreatureEncounters() {
+    const T = GAME_CONFIG.TILE_SIZE;
+    // Creature encounter spots around the map - walking onto them triggers an encounter
+    const spots = [
+      { id: 'spot-bouquettle', creatureId: 'bouquettle', tileX: 4, tileY: 22 },
+      { id: 'spot-dovelett', creatureId: 'dovelett', tileX: 27, tileY: 4 },
+      { id: 'spot-veileon', creatureId: 'veileon', tileX: 12, tileY: 8 },
+      { id: 'spot-dancelf', creatureId: 'dancelf', tileX: 22, tileY: 19 },
+      { id: 'spot-toastini', creatureId: 'toastini', tileX: 26, tileY: 14 },
+      { id: 'spot-confettail', creatureId: 'confettail', tileX: 8, tileY: 15 },
+      { id: 'spot-cakemon', creatureId: 'cakemon', tileX: 25, tileY: 11 },
+      { id: 'spot-ringbear', creatureId: 'ringbear', tileX: 15, tileY: 22 },
+    ];
+
+    spots.forEach(spot => {
+      // Add a subtle sparkle on the tile
+      const sparkle = this.add.image(spot.tileX * T, spot.tileY * T, 'sparkle');
+      sparkle.setDepth(3);
+      sparkle.setAlpha(0.4);
+      sparkle.setScale(0.7);
+      this.tweens.add({
+        targets: sparkle,
+        alpha: 0.15,
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+      });
+
+      this.creatureSpots.push({
+        ...spot,
+        sparkle,
+        active: true,
+      });
+    });
+  }
+
+  removeDiscoveredCreatureSpots(spotIds) {
+    spotIds.forEach(id => {
+      const spot = this.creatureSpots.find(s => s.id === id);
+      if (spot) {
+        spot.active = false;
+        if (spot.sparkle) spot.sparkle.setVisible(false);
+      }
+    });
+  }
+
+  checkCreatureEncounter() {
+    const playerTile = this.player.getTilePos();
+    for (const spot of this.creatureSpots) {
+      if (!spot.active) continue;
+      if (spot.tileX === playerTile.x && spot.tileY === playerTile.y) {
+        // Trigger encounter!
+        spot.active = false;
+        if (spot.sparkle) spot.sparkle.setVisible(false);
+
+        const creature = this.pokedexManager.getCreature(spot.creatureId);
+        if (creature && this.pokedexManager.discover(spot.creatureId)) {
+          // Show encounter screen
+          this.showCreatureEncounter(creature);
+        }
+        this.saveGame();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  showCreatureEncounter(creature) {
+    this.isInteracting = true;
+
+    // Simple encounter notification using basic scene objects
+    const cx = this.cameras.main.scrollX + GAME_CONFIG.WIDTH / 2;
+    const cy = this.cameras.main.scrollY + GAME_CONFIG.HEIGHT / 2;
+
+    // Flash
+    const flash = this.add.rectangle(cx, cy, GAME_CONFIG.WIDTH, GAME_CONFIG.HEIGHT, 0xffffff).setDepth(998);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => flash.destroy(),
+    });
+
+    // Dark overlay
+    const overlay = this.add.rectangle(cx, cy, GAME_CONFIG.WIDTH, GAME_CONFIG.HEIGHT, 0x2a4a2e, 0.92).setDepth(998);
+
+    // Creature name text
+    const nameText = this.add.text(cx, cy + 40, 'Wild ' + creature.name + ' appeared!', {
+      fontSize: '10px', color: '#f8f8f8', fontFamily: 'monospace', fontStyle: 'bold',
+    }).setOrigin(0.5).setDepth(999);
+
+    // Pokedex registered text
+    const regText = this.add.text(cx, cy + 56, 'Registered in Pokedex!', {
+      fontSize: '7px', color: '#f8d848', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(999).setAlpha(0);
+
+    this.tweens.add({ targets: regText, alpha: 1, delay: 800, duration: 300 });
+
+    // Auto-dismiss after 2.5 seconds
+    this.time.delayedCall(2500, () => {
+      overlay.destroy();
+      nameText.destroy();
+      regText.destroy();
+      this.isInteracting = false;
+    });
+  }
+
+  checkBadges() {
+    // Award badges for completed quests
+    Object.values(this.badgeManager.badges).forEach(badge => {
+      if (!this.badgeManager.hasBadge(badge.id) && this.questManager.isQuestComplete(badge.questId)) {
+        this.badgeManager.earnBadge(badge.id);
+      }
+    });
+  }
+
   startBattle(triviaSetId) {
+    this.isInteracting = true;
     this.scene.pause();
-    this.scene.launch('BattleScene', {
+    this.game.scene.start('BattleScene', {
       triviaSetId,
       battleManager: this.battleManager,
     });
   }
 
   onBattleComplete(results) {
+    this.isInteracting = false;
     // Mark quest complete if passed
     if (results.rating !== 'fail') {
       this.questManager.advanceStep('bestman-quiz', 'complete-trivia');
     }
+    this.saveGame();
   }
 
   openGuestbook() {
     this.scene.pause();
     this.scene.launch('GuestbookScene');
+  }
+
+  openPokedex() {
+    this.scene.pause();
+    this.scene.launch('PokedexScene', {
+      pokedexManager: this.pokedexManager,
+    });
+  }
+
+  openTrainerCard() {
+    this.scene.pause();
+    this.scene.launch('TrainerCardScene', {
+      badgeManager: this.badgeManager,
+      pokedexManager: this.pokedexManager,
+      questManager: this.questManager,
+    });
   }
 
   onAllQuestsComplete() {
@@ -584,7 +771,6 @@ class OverworldScene extends Phaser.Scene {
       });
     });
 
-    // Add a finale dialogue if it doesn't exist
     if (!this.dialogueManager.dialogues['finale-dialogue']) {
       this.dialogueManager.dialogues['finale-dialogue'] = {
         nodes: [
@@ -601,11 +787,18 @@ class OverworldScene extends Phaser.Scene {
       .filter(o => !o.isStatic && !o.active)
       .map(o => o.id);
 
+    const discoveredCreatureSpots = this.creatureSpots
+      .filter(s => !s.active)
+      .map(s => s.id);
+
     SaveManager.save({
       playerX: this.player.x,
       playerY: this.player.y,
       ...this.questManager.getState(),
+      pokedex: this.pokedexManager.getState(),
+      badges: this.badgeManager.getState(),
       collectedItems,
+      discoveredCreatureSpots,
     });
   }
 }
