@@ -1,0 +1,58 @@
+{
+  "bestman-trivia": {
+    "title": "Best Man's Challenge",
+    "description": "How well do you know Ben & Lou?",
+    "questions": [
+      {
+        "question": "Where did Ben and Lou first meet?",
+        "answers": [
+          { "text": "At a coffee shop", "correct": false },
+          { "text": "Through mutual friends", "correct": true },
+          { "text": "At work", "correct": false },
+          { "text": "At a concert", "correct": false }
+        ],
+        "funFact": "They were introduced by a mutual friend at a dinner party! The rest is history."
+      },
+      {
+        "question": "What was their first date?",
+        "answers": [
+          { "text": "A fancy restaurant", "correct": false },
+          { "text": "A movie", "correct": false },
+          { "text": "A walk in the park", "correct": true },
+          { "text": "A cooking class", "correct": false }
+        ],
+        "funFact": "They took a long walk in the park and talked for hours. Neither wanted the date to end!"
+      },
+      {
+        "question": "What is Ben & Lou's favorite thing to do together?",
+        "answers": [
+          { "text": "Travel", "correct": true },
+          { "text": "Watch sports", "correct": false },
+          { "text": "Play video games", "correct": false },
+          { "text": "Go shopping", "correct": false }
+        ],
+        "funFact": "They love exploring new places together! They've already visited 10 countries."
+      },
+      {
+        "question": "What pet do Ben and Lou have?",
+        "answers": [
+          { "text": "A cat named Whiskers", "correct": false },
+          { "text": "A dog named Max", "correct": true },
+          { "text": "A hamster named Peanut", "correct": false },
+          { "text": "No pets (yet!)", "correct": false }
+        ],
+        "funFact": "Max is a golden retriever who loves belly rubs and stealing socks!"
+      },
+      {
+        "question": "How did Ben propose to Lou?",
+        "answers": [
+          { "text": "At a restaurant", "correct": false },
+          { "text": "On a beach at sunset", "correct": true },
+          { "text": "At a sports game", "correct": false },
+          { "text": "In a hot air balloon", "correct": false }
+        ],
+        "funFact": "Ben proposed during a sunset walk on the beach. Lou said yes before he even finished asking!"
+      }
+    ]
+  }
+}

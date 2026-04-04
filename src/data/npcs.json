@@ -1,0 +1,51 @@
+[
+  {
+    "id": "lou",
+    "name": "Lou",
+    "spriteKey": "npc-lou",
+    "tileX": 15,
+    "tileY": 6,
+    "direction": "down",
+    "dialogueId": "lou-main",
+    "questId": "lost-bouquet"
+  },
+  {
+    "id": "ben",
+    "name": "Ben",
+    "spriteKey": "npc-ben",
+    "tileX": 16,
+    "tileY": 6,
+    "direction": "down",
+    "dialogueId": "ben-main"
+  },
+  {
+    "id": "bestman",
+    "name": "Best Man",
+    "spriteKey": "npc-bestman",
+    "tileX": 24,
+    "tileY": 16,
+    "direction": "left",
+    "dialogueId": "bestman-main",
+    "questId": "bestman-quiz"
+  },
+  {
+    "id": "moh",
+    "name": "Maid of Honor",
+    "spriteKey": "npc-moh",
+    "tileX": 5,
+    "tileY": 12,
+    "direction": "right",
+    "dialogueId": "moh-main",
+    "questId": "ring-rescue"
+  },
+  {
+    "id": "grandma",
+    "name": "Grandma",
+    "spriteKey": "npc-grandma",
+    "tileX": 7,
+    "tileY": 18,
+    "direction": "down",
+    "dialogueId": "grandma-main",
+    "questId": "grandma-memories"
+  }
+]

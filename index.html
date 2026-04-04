@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ben & Lou's Wedding Adventure</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+    #game-container {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+  <script src="src/config.js"></script>
+  <script src="src/utils/GridMovement.js"></script>
+  <script src="src/utils/TypewriterEffect.js"></script>
+  <script src="src/entities/Player.js"></script>
+  <script src="src/entities/NPC.js"></script>
+  <script src="src/systems/InputManager.js"></script>
+  <script src="src/systems/SaveManager.js"></script>
+  <script src="src/systems/DialogueManager.js"></script>
+  <script src="src/systems/QuestManager.js"></script>
+  <script src="src/systems/BattleManager.js"></script>
+  <script src="src/ui/DialogueBox.js"></script>
+  <script src="src/ui/ChoiceMenu.js"></script>
+  <script src="src/ui/TouchControls.js"></script>
+  <script src="src/ui/BattleHUD.js"></script>
+  <script src="src/ui/QuestLog.js"></script>
+  <script src="src/scenes/BootScene.js"></script>
+  <script src="src/scenes/PreloadScene.js"></script>
+  <script src="src/scenes/TitleScene.js"></script>
+  <script src="src/scenes/OverworldScene.js"></script>
+  <script src="src/scenes/BattleScene.js"></script>
+  <script src="src/scenes/GuestbookScene.js"></script>
+  <script src="src/scenes/CreditsScene.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

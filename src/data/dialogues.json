@@ -1,0 +1,445 @@
+{
+  "lou-main": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "condition",
+        "condition": { "quest": "lost-bouquet", "status": "complete" },
+        "ifTrue": "complete",
+        "ifFalse": "check-active"
+      },
+      {
+        "id": "check-active",
+        "type": "condition",
+        "condition": { "quest": "lost-bouquet", "status": "active" },
+        "ifTrue": "active",
+        "ifFalse": "intro"
+      },
+      {
+        "id": "intro",
+        "speaker": "Lou",
+        "text": "Oh no! I can't find my bouquet anywhere! I had it just a moment ago...",
+        "next": "intro2"
+      },
+      {
+        "id": "intro2",
+        "speaker": "Lou",
+        "text": "I think I left it near the fountain in the garden. Could you find it for me?",
+        "next": "intro-choice"
+      },
+      {
+        "id": "intro-choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "I'll find it!",
+            "next": "accept",
+            "action": { "type": "start-quest", "questId": "lost-bouquet" }
+          },
+          {
+            "text": "Maybe later",
+            "next": "decline"
+          }
+        ]
+      },
+      {
+        "id": "accept",
+        "speaker": "Lou",
+        "text": "Thank you so much! I think it's somewhere near the fountain area.",
+        "next": null
+      },
+      {
+        "id": "decline",
+        "speaker": "Lou",
+        "text": "Oh... okay. Come back if you change your mind!",
+        "next": null
+      },
+      {
+        "id": "active",
+        "speaker": "Lou",
+        "text": "Any luck finding my bouquet? I think it was near the fountain...",
+        "next": null
+      },
+      {
+        "id": "complete",
+        "speaker": "Lou",
+        "text": "My bouquet looks so beautiful! Thank you for finding it! This wedding is going to be perfect!",
+        "next": null
+      }
+    ]
+  },
+
+  "ben-main": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "Ben",
+        "text": "Welcome to our wedding! I'm so glad you could make it!",
+        "next": "ben2"
+      },
+      {
+        "id": "ben2",
+        "speaker": "Ben",
+        "text": "Feel free to explore and talk to everyone. There's a lot to see and do!",
+        "next": "ben3"
+      },
+      {
+        "id": "ben3",
+        "speaker": "Ben",
+        "text": "And don't forget to sign the guestbook before you leave!",
+        "next": null
+      }
+    ]
+  },
+
+  "bestman-main": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "condition",
+        "condition": { "quest": "bestman-quiz", "status": "complete" },
+        "ifTrue": "complete",
+        "ifFalse": "check-active"
+      },
+      {
+        "id": "check-active",
+        "type": "condition",
+        "condition": { "quest": "bestman-quiz", "status": "active" },
+        "ifTrue": "active",
+        "ifFalse": "intro"
+      },
+      {
+        "id": "intro",
+        "speaker": "Best Man",
+        "text": "Hey there! Think you know Ben and Lou pretty well?",
+        "next": "intro2"
+      },
+      {
+        "id": "intro2",
+        "speaker": "Best Man",
+        "text": "I've got a little trivia challenge for you! Answer my questions about the happy couple!",
+        "next": "intro-choice"
+      },
+      {
+        "id": "intro-choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "Bring it on!",
+            "next": "start-quiz",
+            "action": { "type": "start-quest", "questId": "bestman-quiz" }
+          },
+          {
+            "text": "Not right now",
+            "next": "decline"
+          }
+        ]
+      },
+      {
+        "id": "start-quiz",
+        "speaker": "Best Man",
+        "text": "Alright, let's see what you know!",
+        "action": { "type": "start-battle", "triviaSetId": "bestman-trivia" },
+        "next": null
+      },
+      {
+        "id": "decline",
+        "speaker": "Best Man",
+        "text": "No worries! Come back when you're ready for the challenge!",
+        "next": null
+      },
+      {
+        "id": "active",
+        "speaker": "Best Man",
+        "text": "Ready to try the trivia again?",
+        "next": "retry-choice"
+      },
+      {
+        "id": "retry-choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "Let's go!",
+            "next": "start-quiz"
+          },
+          {
+            "text": "Maybe later",
+            "next": "decline"
+          }
+        ]
+      },
+      {
+        "id": "complete",
+        "speaker": "Best Man",
+        "text": "You really know Ben and Lou! Great job on that trivia!",
+        "next": null
+      }
+    ]
+  },
+
+  "moh-main": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "condition",
+        "condition": { "quest": "ring-rescue", "status": "complete" },
+        "ifTrue": "complete",
+        "ifFalse": "check-active"
+      },
+      {
+        "id": "check-active",
+        "type": "condition",
+        "condition": { "quest": "ring-rescue", "status": "active" },
+        "ifTrue": "active",
+        "ifFalse": "intro"
+      },
+      {
+        "id": "intro",
+        "speaker": "Maid of Honor",
+        "text": "Oh thank goodness you're here! The ring bearer dropped the rings somewhere!",
+        "next": "intro2"
+      },
+      {
+        "id": "intro2",
+        "speaker": "Maid of Honor",
+        "text": "I need you to find both wedding rings before the ceremony! I think they rolled off in different directions...",
+        "next": "intro-choice"
+      },
+      {
+        "id": "intro-choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "I'll find them!",
+            "next": "accept",
+            "action": { "type": "start-quest", "questId": "ring-rescue" }
+          },
+          {
+            "text": "Not now",
+            "next": "decline"
+          }
+        ]
+      },
+      {
+        "id": "accept",
+        "speaker": "Maid of Honor",
+        "text": "Check near the tables and around the garden! They could be anywhere!",
+        "next": null
+      },
+      {
+        "id": "decline",
+        "speaker": "Maid of Honor",
+        "text": "Please hurry back! We need those rings!",
+        "next": null
+      },
+      {
+        "id": "active",
+        "speaker": "Maid of Honor",
+        "text": "Have you found the rings yet? Keep looking near the tables and garden!",
+        "next": null
+      },
+      {
+        "id": "complete",
+        "speaker": "Maid of Honor",
+        "text": "You found both rings! You're a lifesaver! The ceremony can go on!",
+        "next": null
+      }
+    ]
+  },
+
+  "grandma-main": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "condition",
+        "condition": { "quest": "grandma-memories", "status": "complete" },
+        "ifTrue": "complete",
+        "ifFalse": "check-active"
+      },
+      {
+        "id": "check-active",
+        "type": "condition",
+        "condition": { "quest": "grandma-memories", "status": "active" },
+        "ifTrue": "active",
+        "ifFalse": "intro"
+      },
+      {
+        "id": "intro",
+        "speaker": "Grandma",
+        "text": "Oh hello, dear! Come sit with me for a moment.",
+        "next": "intro2"
+      },
+      {
+        "id": "intro2",
+        "speaker": "Grandma",
+        "text": "I have some wonderful memories of Ben and Lou I'd love to share. Would you like to hear them?",
+        "next": "intro-choice"
+      },
+      {
+        "id": "intro-choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "I'd love to!",
+            "next": "story1",
+            "action": { "type": "start-quest", "questId": "grandma-memories" }
+          },
+          {
+            "text": "Maybe later",
+            "next": "decline"
+          }
+        ]
+      },
+      {
+        "id": "story1",
+        "speaker": "Grandma",
+        "text": "I remember the first time Ben brought Lou home for the holidays. They were both so nervous!",
+        "next": "story1b"
+      },
+      {
+        "id": "story1b",
+        "speaker": "Grandma",
+        "text": "But by the end of dinner, it felt like Lou had always been part of the family.",
+        "next": "story2"
+      },
+      {
+        "id": "story2",
+        "speaker": "Grandma",
+        "text": "And then there was the time they tried to bake a cake together for my birthday...",
+        "next": "story2b"
+      },
+      {
+        "id": "story2b",
+        "speaker": "Grandma",
+        "text": "Let's just say the fire department was NOT amused! But the thought was sweet.",
+        "next": "story3"
+      },
+      {
+        "id": "story3",
+        "speaker": "Grandma",
+        "text": "I always knew they were meant for each other. You can see it in the way they look at each other.",
+        "next": "story3b"
+      },
+      {
+        "id": "story3b",
+        "speaker": "Grandma",
+        "text": "I'm so happy to be here today. Thank you for listening to an old woman's stories!",
+        "action": { "type": "complete-quest", "questId": "grandma-memories" },
+        "next": null
+      },
+      {
+        "id": "decline",
+        "speaker": "Grandma",
+        "text": "That's alright, dear. Come back anytime. I'm not going anywhere!",
+        "next": null
+      },
+      {
+        "id": "active",
+        "speaker": "Grandma",
+        "text": "Come, sit! Let me tell you more stories...",
+        "next": "story1"
+      },
+      {
+        "id": "complete",
+        "speaker": "Grandma",
+        "text": "Thank you for listening to my stories, dear. This is such a beautiful day!",
+        "next": null
+      }
+    ]
+  },
+
+  "bouquet-found": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "You found Lou's bouquet! It's a beautiful arrangement of roses and lilies.",
+        "action": { "type": "complete-quest", "questId": "lost-bouquet" },
+        "next": null
+      }
+    ]
+  },
+
+  "ring1-found": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "You found one of the wedding rings! It was hiding under a table. One more to go!",
+        "action": { "type": "advance-quest", "questId": "ring-rescue", "stepId": "find-ring-1" },
+        "next": null
+      }
+    ]
+  },
+
+  "ring2-found": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "You found the second ring! It was caught in the bushes. Take them back to the Maid of Honor!",
+        "action": { "type": "advance-quest", "questId": "ring-rescue", "stepId": "find-ring-2" },
+        "next": null
+      }
+    ]
+  },
+
+  "guestbook-interact": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "A beautiful guestbook sits open on the stand. Would you like to sign it?",
+        "next": "choice"
+      },
+      {
+        "id": "choice",
+        "type": "choice",
+        "choices": [
+          {
+            "text": "Sign the guestbook",
+            "action": { "type": "open-guestbook" },
+            "next": null
+          },
+          {
+            "text": "Maybe later",
+            "next": null
+          }
+        ]
+      }
+    ]
+  },
+
+  "sign-interact": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "A wooden sign reads: 'Welcome to Ben & Lou's Wedding! Explore, have fun, and don't forget to sign the guestbook!'",
+        "next": null
+      }
+    ]
+  },
+
+  "cake-interact": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "A magnificent three-tier wedding cake! It's decorated with delicate sugar flowers and topped with two tiny figures.",
+        "next": null
+      }
+    ]
+  },
+
+  "fountain-interact": {
+    "nodes": [
+      {
+        "id": "start",
+        "speaker": "",
+        "text": "A beautiful stone fountain. Coins glitter at the bottom - looks like guests have been making wishes!",
+        "next": null
+      }
+    ]
+  }
+}

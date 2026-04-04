@@ -1,0 +1,64 @@
+[
+  {
+    "id": "lost-bouquet",
+    "title": "The Lost Bouquet",
+    "description": "Find Lou's missing bouquet near the fountain",
+    "giver": "lou",
+    "steps": [
+      {
+        "id": "find-bouquet",
+        "description": "Find the bouquet near the fountain",
+        "type": "interact",
+        "target": "bouquet"
+      }
+    ]
+  },
+  {
+    "id": "bestman-quiz",
+    "title": "The Best Man's Quiz",
+    "description": "Answer the Best Man's trivia questions about Ben & Lou",
+    "giver": "bestman",
+    "steps": [
+      {
+        "id": "complete-trivia",
+        "description": "Complete the trivia challenge",
+        "type": "battle",
+        "target": "bestman-trivia"
+      }
+    ]
+  },
+  {
+    "id": "ring-rescue",
+    "title": "Ring Bearer Rescue",
+    "description": "Find both wedding rings that the ring bearer dropped",
+    "giver": "moh",
+    "steps": [
+      {
+        "id": "find-ring-1",
+        "description": "Find the first ring near the tables",
+        "type": "interact",
+        "target": "ring1"
+      },
+      {
+        "id": "find-ring-2",
+        "description": "Find the second ring in the garden",
+        "type": "interact",
+        "target": "ring2"
+      }
+    ]
+  },
+  {
+    "id": "grandma-memories",
+    "title": "Grandma's Memories",
+    "description": "Listen to Grandma's stories about Ben & Lou",
+    "giver": "grandma",
+    "steps": [
+      {
+        "id": "listen-stories",
+        "description": "Listen to Grandma's three stories",
+        "type": "talk",
+        "target": "grandma"
+      }
+    ]
+  }
+]
