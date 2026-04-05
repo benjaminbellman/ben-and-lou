@@ -4,7 +4,6 @@ class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    // Generate original assets only - creature sprites generated in create()
     const T = GAME_CONFIG.TILE_SIZE;
     this.generateTileset(T);
     this.generateCharacterSprite('player', [0x4488cc, 0x2266aa, 0xffcc88]);
@@ -21,11 +20,186 @@ class BootScene extends Phaser.Scene {
   }
 
   create() {
-    // Generate new Pokemon-themed assets in create() to avoid preload hanging
-    this.generateCreatureSprites();
-    this.generateBadgeSprites();
-    this.generateBattlePlatforms();
+    // Generate creature/badge/platform textures using add.graphics + generateTexture
+    // This works in create() and doesn't block preload()
+    const S = 16;
+    const cols = 4;
+    const creatureKeys = [
+      'creature-ringbear-small', 'creature-bouquettle-small', 'creature-cakemon-small', 'creature-veileon-small',
+      'creature-dovelett-small', 'creature-dancelf-small', 'creature-toastini-small', 'creature-confettail-small',
+      'creature-pikawedding-small', 'creature-jigglybell-small', 'creature-eevow-small', 'creature-squirtcake-small',
+      'creature-bulbasnog-small',
+    ];
+    const creatureColors = [
+      [0x8B6914, 0xA07818, 0xFFD700], [0x44AA33, 0x66BB55, 0xFF6688],
+      [0xF8F0E8, 0xFFE0D0, 0xFF8888], [0xE8E0F0, 0xF0E8F8, 0x6644AA],
+      [0xF0F0F0, 0xE8E8E8, 0xFF6688], [0xFFB8D8, 0xFFD0E0, 0xFFD700],
+      [0xDDEEFF, 0xCCDDEE, 0xFFDD44], [0xFF8844, 0xFFAA66, 0xFFDD44],
+      [0xFFDD44, 0xFFEE66, 0xFF4444], [0xFFAACC, 0xFFBBDD, 0x44CCAA],
+      [0xBB8844, 0xCC9955, 0xF0E0C8], [0x6699CC, 0x77AADD, 0xF8F0E8],
+      [0x66AA88, 0x77BB99, 0xFF6688],
+    ];
+
+    const rows = Math.ceil(creatureKeys.length / cols);
+    const g = this.add.graphics();
+    creatureKeys.forEach((key, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const ox = col * S;
+      const oy = row * S;
+      const c = creatureColors[i];
+      g.fillStyle(c[0]); g.fillRect(ox+4, oy+5, 8, 7);
+      g.fillStyle(c[1]); g.fillRect(ox+3, oy+1, 10, 6);
+      g.fillStyle(0x000000); g.fillRect(ox+5, oy+3, 2, 2); g.fillRect(ox+9, oy+3, 2, 2);
+      g.fillStyle(0xFFFFFF); g.fillRect(ox+5, oy+3, 1, 1); g.fillRect(ox+9, oy+3, 1, 1);
+      g.fillStyle(c[2]); g.fillRect(ox+2, oy+0, 3, 3); g.fillRect(ox+11, oy+0, 3, 3);
+      g.fillStyle(c[2]); g.fillRect(ox+6, oy+6, 4, 2);
+      g.fillStyle(c[0]); g.fillRect(ox+4, oy+12, 3, 3); g.fillRect(ox+9, oy+12, 3, 3);
+      g.fillStyle(0x000000); g.fillRect(ox+7, oy+5, 2, 1);
+    });
+    g.generateTexture('creature-atlas', cols * S, rows * S);
+    g.destroy();
+
+    const tex = this.textures.get('creature-atlas');
+    creatureKeys.forEach((key, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      tex.add(key, 0, col * S, row * S, S, S);
+    });
+
+    // Badges
+    const bS = 16;
+    const bg = this.add.graphics();
+    const badgeData = [
+      { key: 'badge-bouquet', c: 0xFF6688 }, { key: 'badge-trivia', c: 0x4488FF },
+      { key: 'badge-ring', c: 0xFFD700 }, { key: 'badge-memory', c: 0xAA66CC },
+      { key: 'badge-locked', c: 0x555555 },
+    ];
+    badgeData.forEach((b, i) => {
+      const ox = i * bS;
+      bg.fillStyle(b.c); bg.fillRect(ox+4, 1, 8, 14); bg.fillRect(ox+1, 4, 14, 8); bg.fillRect(ox+2, 2, 12, 12);
+      bg.fillStyle(b.c === 0x555555 ? 0x777777 : 0xFFFFFF); bg.fillRect(ox+6, 6, 4, 4);
+    });
+    bg.generateTexture('badge-atlas', badgeData.length * bS, bS);
+    bg.destroy();
+    const btex = this.textures.get('badge-atlas');
+    badgeData.forEach((b, i) => { btex.add(b.key, 0, i * bS, 0, bS, bS); });
+
+    // Platforms
+    const pg = this.add.graphics();
+    pg.fillStyle(0x4a8c3f); pg.fillRect(8, 4, 64, 12); pg.fillRect(4, 6, 72, 8);
+    pg.fillStyle(0x3a7c2f); pg.fillRect(10, 8, 60, 8);
+    pg.generateTexture('battle-platform-player', 80, 20);
+    pg.clear();
+    pg.fillStyle(0x4a8c3f); pg.fillRect(6, 3, 52, 10);
+    pg.fillStyle(0x3a7c2f); pg.fillRect(8, 7, 48, 6);
+    pg.generateTexture('battle-platform-enemy', 64, 16);
+    pg.destroy();
+
     this.scene.start('PreloadScene');
+  }
+
+  generateCreatureAndBadgeAtlases() {
+    const S = 32;
+    const cols = 4;
+    const hex = (c) => '#' + c.toString(16).padStart(6, '0');
+    const creatureKeys = [
+      'creature-ringbear-small', 'creature-bouquettle-small', 'creature-cakemon-small', 'creature-veileon-small',
+      'creature-dovelett-small', 'creature-dancelf-small', 'creature-toastini-small', 'creature-confettail-small',
+      'creature-pikawedding-small', 'creature-jigglybell-small', 'creature-eevow-small', 'creature-squirtcake-small',
+      'creature-bulbasnog-small',
+    ];
+    const creatureColors = [
+      [0x8B6914, 0xA07818, 0xFFD700],
+      [0x44AA33, 0x66BB55, 0xFF6688],
+      [0xF8F0E8, 0xFFE0D0, 0xFF8888],
+      [0xE8E0F0, 0xF0E8F8, 0x6644AA],
+      [0xF0F0F0, 0xE8E8E8, 0xFF6688],
+      [0xFFB8D8, 0xFFD0E0, 0xFFD700],
+      [0xDDEEFF, 0xCCDDEE, 0xFFDD44],
+      [0xFF8844, 0xFFAA66, 0xFFDD44],
+      [0xFFDD44, 0xFFEE66, 0xFF4444],
+      [0xFFAACC, 0xFFBBDD, 0x44CCAA],
+      [0xBB8844, 0xCC9955, 0xF0E0C8],
+      [0x6699CC, 0x77AADD, 0xF8F0E8],
+      [0x66AA88, 0x77BB99, 0xFF6688],
+    ];
+
+    // Single canvas atlas for all creatures
+    const rows = Math.ceil(creatureKeys.length / cols);
+    const atlas = this.textures.createCanvas('creature-atlas', cols * S, rows * S);
+    const ctx = atlas.context;
+
+    creatureKeys.forEach((key, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const ox = col * S;
+      const oy = row * S;
+      const c = creatureColors[i];
+
+      ctx.fillStyle = hex(c[0]); ctx.fillRect(ox+8, oy+10, 16, 14); // body
+      ctx.fillStyle = hex(c[1]); ctx.fillRect(ox+6, oy+2, 20, 12); // head
+      ctx.fillStyle = '#000000'; ctx.fillRect(ox+10, oy+6, 3, 3); ctx.fillRect(ox+19, oy+6, 3, 3); // eyes
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(ox+11, oy+6, 1, 1); ctx.fillRect(ox+20, oy+6, 1, 1); // eye shine
+      ctx.fillStyle = hex(c[2]); ctx.fillRect(ox+4, oy+0, 5, 5); ctx.fillRect(ox+23, oy+0, 5, 5); // ears
+      ctx.fillStyle = hex(c[2]); ctx.fillRect(ox+12, oy+12, 8, 3); // body detail
+      ctx.fillStyle = hex(c[0]); ctx.fillRect(ox+9, oy+24, 5, 5); ctx.fillRect(ox+18, oy+24, 5, 5); // feet
+      ctx.fillStyle = '#000000'; ctx.fillRect(ox+14, oy+10, 4, 1); // mouth
+    });
+    atlas.refresh();
+
+    // Add frame references for each creature
+    const tex = this.textures.get('creature-atlas');
+    creatureKeys.forEach((key, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      tex.add(key, 0, col * S, row * S, S, S);
+    });
+
+    // Badge atlas - single canvas
+    const bS = 16;
+    const badgeData = [
+      { key: 'badge-bouquet', c: '#FF6688' }, { key: 'badge-trivia', c: '#4488FF' },
+      { key: 'badge-ring', c: '#FFD700' }, { key: 'badge-memory', c: '#AA66CC' },
+      { key: 'badge-locked', c: '#555555' },
+    ];
+    const ba = this.textures.createCanvas('badge-atlas', badgeData.length * bS, bS);
+    const bctx = ba.context;
+    badgeData.forEach((b, i) => {
+      const ox = i * bS;
+      bctx.fillStyle = b.c;
+      bctx.fillRect(ox+4, 1, 8, 14); bctx.fillRect(ox+1, 4, 14, 8); bctx.fillRect(ox+2, 2, 12, 12);
+      bctx.fillStyle = (b.key === 'badge-locked') ? '#777777' : '#FFFFFF';
+      bctx.fillRect(ox+6, 6, 4, 4);
+    });
+    ba.refresh();
+    const btex = this.textures.get('badge-atlas');
+    badgeData.forEach((b, i) => { btex.add(b.key, 0, i * bS, 0, bS, bS); });
+
+    // Battle platforms
+    const pp = this.textures.createCanvas('battle-platform-player', 80, 20);
+    const pc = pp.context;
+    pc.fillStyle = '#4a8c3f'; pc.fillRect(8, 4, 64, 12); pc.fillRect(4, 6, 72, 8);
+    pc.fillStyle = '#3a7c2f'; pc.fillRect(10, 8, 60, 8);
+    pp.refresh();
+
+    const ep = this.textures.createCanvas('battle-platform-enemy', 64, 16);
+    const ec = ep.context;
+    ec.fillStyle = '#4a8c3f'; ec.fillRect(6, 3, 52, 10);
+    ec.fillStyle = '#3a7c2f'; ec.fillRect(8, 7, 48, 6);
+    ep.refresh();
+  }
+
+  drawCreatureOnAtlas(ctx, offsetX, offsetY, drawFn) {
+    const g = {
+      fillStyle: function(color) {
+        ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+      },
+      fillRect: function(x, y, w, h) {
+        ctx.fillRect(offsetX + x, offsetY + y, w, h);
+      }
+    };
+    drawFn(g);
   }
 
   generateAssets() {
@@ -686,42 +860,353 @@ class BootScene extends Phaser.Scene {
   }
 
   generateCreatureSprites() {
-    // Use Phaser Graphics to generate creature textures (works in WebGL)
-    const creatures = [
-      { key: 'creature-ringbear-small', color: 0x8B6914, accent: 0xFFD700, detail: 0xA07818 },
-      { key: 'creature-bouquettle-small', color: 0x44AA33, accent: 0xFF6688, detail: 0x228811 },
-      { key: 'creature-cakemon-small', color: 0xF8F0E8, accent: 0xFF8888, detail: 0xFF4444 },
-      { key: 'creature-veileon-small', color: 0xE8E0F0, accent: 0xFFDD88, detail: 0x6644AA },
-      { key: 'creature-dovelett-small', color: 0xF0F0F0, accent: 0xFF6688, detail: 0xFFAA44 },
-      { key: 'creature-dancelf-small', color: 0xFFB8D8, accent: 0xFFD700, detail: 0xFF88BB },
-      { key: 'creature-toastini-small', color: 0xDDEEFF, accent: 0xFFDD44, detail: 0xFFEE66 },
-      { key: 'creature-confettail-small', color: 0xFF8844, accent: 0xFFDD44, detail: 0x44AAFF },
-    ];
+    const S = 32;
+    const cols = 4;
+    const creatureDrawFns = [];
 
-    creatures.forEach(c => {
-      const g = this.make.graphics({ x: 0, y: 0, add: false });
-      // Body
-      g.fillStyle(c.color);
-      g.fillRect(4, 6, 8, 8);
+    // Collect all creature draw functions
+    const addCreature = (key, size, drawFn) => {
+      creatureDrawFns.push({ key, drawFn });
+    };
+
+    addCreature('creature-ringbear-small', (g) => {
+      // Brown bear body
+      g.fillStyle(0x8B6914); g.fillRect(8,12,16,14);
+      g.fillStyle(0xA07818); g.fillRect(10,14,12,10);
       // Head
-      g.fillRect(3, 2, 10, 6);
+      g.fillStyle(0x8B6914); g.fillRect(7,4,18,12);
+      g.fillStyle(0xA07818); g.fillRect(9,6,14,8);
+      // Ears
+      g.fillStyle(0x8B6914); g.fillRect(6,2,6,6); g.fillRect(20,2,6,6);
+      g.fillStyle(0xC89028); g.fillRect(8,3,3,3); g.fillRect(22,3,3,3);
       // Eyes
-      g.fillStyle(0x000000);
-      g.fillRect(5, 4, 1, 1);
-      g.fillRect(9, 4, 1, 1);
-      // Accent (ears/wings/decoration)
-      g.fillStyle(c.accent);
-      g.fillRect(3, 1, 3, 2);
-      g.fillRect(10, 1, 3, 2);
-      // Detail
-      g.fillStyle(c.detail);
-      g.fillRect(6, 6, 4, 2);
+      g.fillStyle(0x000000); g.fillRect(11,8,3,3); g.fillRect(18,8,3,3);
+      g.fillStyle(0xFFFFFF); g.fillRect(12,8,1,1); g.fillRect(19,8,1,1);
+      // Nose + mouth
+      g.fillStyle(0x5a3a0a); g.fillRect(14,11,4,2);
+      g.fillStyle(0x000000); g.fillRect(14,13,2,1); g.fillRect(18,13,2,1);
+      // Arms holding rings
+      g.fillStyle(0x8B6914); g.fillRect(4,14,5,3); g.fillRect(23,14,5,3);
+      // Gold rings
+      g.fillStyle(0xFFD700); g.fillRect(3,12,5,5); g.fillRect(24,12,5,5);
+      g.fillStyle(0x8B6914); g.fillRect(4,13,3,3); g.fillRect(25,13,3,3);
+      g.fillStyle(0x88CCFF); g.fillRect(4,11,3,2);
+      g.fillStyle(0xFF88AA); g.fillRect(25,11,3,2);
       // Feet
-      g.fillStyle(c.color);
-      g.fillRect(4, 13, 3, 2);
-      g.fillRect(9, 13, 3, 2);
-      g.generateTexture(c.key, 16, 16);
-      g.destroy();
+      g.fillStyle(0x6B4910); g.fillRect(9,26,5,4); g.fillRect(18,26,5,4);
+    });
+
+    addCreature('creature-bouquettle-small', S, (g) => {
+      // Green turtle shell
+      g.fillStyle(0x338822); g.fillRect(8,14,16,12);
+      g.fillStyle(0x44AA33); g.fillRect(10,15,12,9);
+      // Head
+      g.fillStyle(0x66BB55); g.fillRect(4,16,8,8);
+      g.fillStyle(0x000000); g.fillRect(6,18,2,2);
+      // Flowers on shell
+      g.fillStyle(0xFF6688); g.fillRect(10,8,5,5); g.fillRect(18,10,4,4);
+      g.fillStyle(0xFFAACC); g.fillRect(14,6,5,5);
+      g.fillStyle(0xFFFFFF); g.fillRect(9,11,3,3); g.fillRect(21,9,3,3);
+      g.fillStyle(0xFFDD44); g.fillRect(15,5,3,3);
+      // Stems
+      g.fillStyle(0x228811); g.fillRect(12,13,2,3); g.fillRect(16,12,2,4); g.fillRect(20,13,2,3);
+      // Legs
+      g.fillStyle(0x66BB55); g.fillRect(9,26,4,4); g.fillRect(19,26,4,4);
+      // Tail
+      g.fillRect(24,20,5,3);
+    });
+
+    addCreature('creature-cakemon-small', S, (g) => {
+      // 3-tier cake body
+      g.fillStyle(0xF8F0E8); g.fillRect(6,18,20,10); // bottom
+      g.fillRect(9,12,14,8); // middle
+      g.fillRect(12,6,8,8); // top
+      // Frosting
+      g.fillStyle(0xFF8888); g.fillRect(6,18,20,2); g.fillRect(9,12,14,2); g.fillRect(12,6,8,2);
+      // Eyes on middle tier
+      g.fillStyle(0x000000); g.fillRect(12,15,2,2); g.fillRect(18,15,2,2);
+      g.fillStyle(0xFFFFFF); g.fillRect(12,15,1,1); g.fillRect(18,15,1,1);
+      // Smile
+      g.fillStyle(0xFF6666); g.fillRect(14,18,4,1);
+      // Cherry on top
+      g.fillStyle(0xFF4444); g.fillRect(14,3,4,4);
+      g.fillStyle(0xFF6666); g.fillRect(15,3,1,1);
+      // Arms
+      g.fillStyle(0xF0E0D0); g.fillRect(3,20,4,3); g.fillRect(25,20,4,3);
+      // Feet
+      g.fillRect(9,28,5,2); g.fillRect(18,28,5,2);
+    });
+
+    addCreature('creature-veileon-small', S, (g) => {
+      // Elegant body
+      g.fillStyle(0xE8E0F0); g.fillRect(12,10,8,14);
+      // Head
+      g.fillStyle(0xF0E8F8); g.fillRect(10,4,12,9);
+      // Eyes (elegant, almond-shaped)
+      g.fillStyle(0x6644AA); g.fillRect(12,7,3,2); g.fillRect(17,7,3,2);
+      g.fillStyle(0x000000); g.fillRect(13,7,1,1); g.fillRect(18,7,1,1);
+      // Flowing veil
+      g.fillStyle(0xFFFFFF); g.fillRect(9,2,14,4);
+      g.fillStyle(0xEEEEFF); g.fillRect(6,5,5,14); g.fillRect(21,5,5,14);
+      g.fillStyle(0xDDDDFF); g.fillRect(4,10,4,14); g.fillRect(24,10,4,14);
+      // Sparkles
+      g.fillStyle(0xFFDD88); g.fillRect(7,8,2,2); g.fillRect(23,7,2,2); g.fillRect(5,16,2,2); g.fillRect(25,15,2,2);
+      // Ribbon tail
+      g.fillStyle(0xD8D0E8); g.fillRect(13,24,6,5); g.fillRect(11,27,4,3); g.fillRect(17,27,4,3);
+    });
+
+    addCreature('creature-dovelett-small', S, (g) => {
+      // White dove body
+      g.fillStyle(0xF0F0F0); g.fillRect(9,14,14,10);
+      g.fillStyle(0xE8E8E8); g.fillRect(11,15,10,8);
+      // Head
+      g.fillStyle(0xF8F8F8); g.fillRect(11,6,10,9);
+      // Beak
+      g.fillStyle(0xFFAA44); g.fillRect(7,9,5,3); g.fillRect(6,10,3,2);
+      // Eye
+      g.fillStyle(0x000000); g.fillRect(14,9,2,2);
+      // Wings
+      g.fillStyle(0xE8E8E8); g.fillRect(4,14,7,8); g.fillRect(21,14,7,8);
+      g.fillStyle(0xD0D0D0); g.fillRect(2,17,5,4); g.fillRect(25,17,5,4);
+      // Heart in beak
+      g.fillStyle(0xFF6688); g.fillRect(5,7,3,2); g.fillRect(7,7,3,2); g.fillRect(6,9,3,1);
+      // Tail feathers
+      g.fillStyle(0xE0E0E0); g.fillRect(13,24,6,4); g.fillRect(11,26,3,3); g.fillRect(18,26,3,3);
+      // Feet
+      g.fillStyle(0xFFAA44); g.fillRect(12,24,3,3); g.fillRect(18,24,3,3);
+    });
+
+    addCreature('creature-dancelf-small', S, (g) => {
+      g.fillStyle(0xFFB8D8); g.fillRect(12,12,8,10);
+      g.fillStyle(0xFFD0E0); g.fillRect(10,4,12,10);
+      g.fillStyle(0x000000); g.fillRect(13,8,2,2); g.fillRect(17,8,2,2);
+      g.fillStyle(0xFF6688); g.fillRect(15,11,2,1);
+      // Crown
+      g.fillStyle(0xFFD700); g.fillRect(11,2,10,3); g.fillRect(13,0,2,3); g.fillRect(16,0,2,3); g.fillRect(19,0,2,3);
+      // Arms dancing
+      g.fillStyle(0xFFB8D8); g.fillRect(5,10,7,3); g.fillRect(20,10,7,3);
+      g.fillRect(3,7,4,4); g.fillRect(25,7,4,4);
+      // Dress
+      g.fillStyle(0xFF88BB); g.fillRect(9,21,14,5); g.fillRect(7,24,18,4);
+      // Sparkles
+      g.fillStyle(0xFFEE88); g.fillRect(6,6,2,2); g.fillRect(24,5,2,2); g.fillRect(5,20,2,2); g.fillRect(25,18,2,2);
+      g.fillStyle(0xFFD0E0); g.fillRect(10,28,4,2); g.fillRect(18,28,4,2);
+    });
+
+    addCreature('creature-toastini-small', S, (g) => {
+      // Champagne glass
+      g.fillStyle(0xDDEEFF); g.fillRect(10,4,12,16);
+      g.fillStyle(0xCCDDEE); g.fillRect(12,6,8,12);
+      // Champagne liquid
+      g.fillStyle(0xFFDD44); g.fillRect(12,10,8,8);
+      g.fillStyle(0xFFEE66); g.fillRect(13,12,6,5);
+      // Bubbles
+      g.fillStyle(0xFFFFFF); g.fillRect(14,11,2,2); g.fillRect(17,13,2,2); g.fillRect(15,8,2,2);
+      // Eyes
+      g.fillStyle(0x000000); g.fillRect(13,14,2,2); g.fillRect(17,14,2,2);
+      g.fillStyle(0xFFFFFF); g.fillRect(13,14,1,1); g.fillRect(17,14,1,1);
+      // Smile
+      g.fillStyle(0xFF8844); g.fillRect(14,17,4,1);
+      // Stem
+      g.fillStyle(0xCCDDEE); g.fillRect(14,20,4,4);
+      // Base
+      g.fillRect(10,24,12,3); g.fillRect(8,26,16,3);
+      // Arms
+      g.fillStyle(0xDDEEFF); g.fillRect(5,12,5,3); g.fillRect(22,12,5,3);
+      // Fizz
+      g.fillStyle(0xFFEE88); g.fillRect(13,1,2,2); g.fillRect(18,2,2,2); g.fillRect(11,0,2,2); g.fillRect(20,1,2,2);
+    });
+
+    addCreature('creature-confettail-small', S, (g) => {
+      // Fox body
+      g.fillStyle(0xFF8844); g.fillRect(9,14,14,10);
+      // Head
+      g.fillStyle(0xFFAA66); g.fillRect(8,6,14,10);
+      // Pointed ears
+      g.fillStyle(0xFF8844); g.fillRect(7,1,5,7); g.fillRect(20,1,5,7);
+      g.fillStyle(0xFFD0A0); g.fillRect(9,3,2,3); g.fillRect(22,3,2,3);
+      // Eyes
+      g.fillStyle(0x000000); g.fillRect(11,9,3,2); g.fillRect(18,9,3,2);
+      g.fillStyle(0xFFFFFF); g.fillRect(12,9,1,1); g.fillRect(19,9,1,1);
+      // Nose
+      g.fillStyle(0xCC4422); g.fillRect(14,12,3,2);
+      // Whiskers
+      g.fillStyle(0xCC8844); g.fillRect(3,10,6,1); g.fillRect(22,10,6,1); g.fillRect(4,13,5,1); g.fillRect(22,13,5,1);
+      // Confetti tail
+      g.fillStyle(0xFF4444); g.fillRect(23,11,5,3);
+      g.fillStyle(0x44AAFF); g.fillRect(26,8,4,3);
+      g.fillStyle(0xFFDD44); g.fillRect(27,13,4,3);
+      g.fillStyle(0x44DD44); g.fillRect(24,15,5,3);
+      g.fillStyle(0xFF88FF); g.fillRect(28,10,3,3);
+      // Confetti spots on body
+      g.fillStyle(0xFF4444); g.fillRect(11,16,2,2);
+      g.fillStyle(0x44AAFF); g.fillRect(19,18,2,2);
+      g.fillStyle(0xFFDD44); g.fillRect(14,20,2,2);
+      // Legs
+      g.fillStyle(0xFF8844); g.fillRect(10,24,4,5); g.fillRect(18,24,4,5);
+      g.fillStyle(0xFFAA66); g.fillRect(10,27,4,2); g.fillRect(18,27,4,2);
+    });
+
+    // --- Pokemon-inspired ambient creatures ---
+    addCreature('creature-pikawedding-small', S, (g) => {
+      // Yellow electric mouse with bow tie
+      g.fillStyle(0xFFDD44); g.fillRect(9,10,14,14); // body
+      g.fillStyle(0xFFEE66); g.fillRect(11,12,10,10);
+      // Head
+      g.fillStyle(0xFFDD44); g.fillRect(8,2,16,12);
+      g.fillStyle(0xFFEE66); g.fillRect(10,4,12,8);
+      // Pointy ears (black tips)
+      g.fillStyle(0xFFDD44); g.fillRect(6,0,5,8); g.fillRect(21,0,5,8);
+      g.fillStyle(0x222222); g.fillRect(6,0,4,3); g.fillRect(22,0,4,3);
+      // Red cheeks
+      g.fillStyle(0xFF4444); g.fillRect(8,9,3,3); g.fillRect(21,9,3,3);
+      // Eyes
+      g.fillStyle(0x000000); g.fillRect(12,6,3,3); g.fillRect(17,6,3,3);
+      g.fillStyle(0xFFFFFF); g.fillRect(13,6,1,1); g.fillRect(18,6,1,1);
+      // Nose + mouth
+      g.fillStyle(0x000000); g.fillRect(15,9,2,1); g.fillRect(14,10,1,1); g.fillRect(17,10,1,1);
+      // Bow tie!
+      g.fillStyle(0xFF2222); g.fillRect(11,14,4,3); g.fillRect(17,14,4,3);
+      g.fillStyle(0xCC0000); g.fillRect(15,14,2,3);
+      // Lightning bolt tail
+      g.fillStyle(0xFFDD44); g.fillRect(23,8,3,4); g.fillRect(25,6,3,4); g.fillRect(27,4,3,5);
+      g.fillStyle(0xCCAA00); g.fillRect(24,9,2,2); g.fillRect(26,7,2,2);
+      // Arms
+      g.fillStyle(0xFFDD44); g.fillRect(5,14,5,3); g.fillRect(22,14,5,3);
+      // Feet
+      g.fillStyle(0xCCAA00); g.fillRect(10,24,5,4); g.fillRect(17,24,5,4);
+    });
+
+    addCreature('creature-jigglybell-small', S, (g) => {
+      // Pink round body
+      g.fillStyle(0xFFAACC); g.fillRect(6,8,20,16);
+      g.fillStyle(0xFFBBDD); g.fillRect(8,9,16,13);
+      g.fillStyle(0xFFCCDD); g.fillRect(10,10,12,10);
+      // Head tuft / curl
+      g.fillStyle(0xFFAACC); g.fillRect(14,2,4,7);
+      g.fillStyle(0xFF99BB); g.fillRect(13,3,3,4);
+      // Big eyes
+      g.fillStyle(0x44CCAA); g.fillRect(10,12,5,5); g.fillRect(17,12,5,5);
+      g.fillStyle(0x000000); g.fillRect(12,13,2,2); g.fillRect(19,13,2,2);
+      g.fillStyle(0xFFFFFF); g.fillRect(12,12,2,1); g.fillRect(19,12,2,1);
+      // Mouth (singing)
+      g.fillStyle(0xFF6688); g.fillRect(14,19,4,2);
+      g.fillStyle(0x000000); g.fillRect(14,19,4,1);
+      // Little bell (wedding bell!)
+      g.fillStyle(0xFFDD44); g.fillRect(24,6,6,6);
+      g.fillStyle(0xFFEE66); g.fillRect(25,7,4,4);
+      g.fillStyle(0xCCAA00); g.fillRect(26,12,2,2);
+      g.fillStyle(0x888888); g.fillRect(26,4,2,3);
+      // Arms holding bell
+      g.fillStyle(0xFFAACC); g.fillRect(22,10,4,3);
+      // Feet
+      g.fillStyle(0xFF99BB); g.fillRect(10,24,5,4); g.fillRect(17,24,5,4);
+      // Music notes
+      g.fillStyle(0x000000); g.fillRect(4,4,2,4); g.fillRect(4,4,4,1);
+    });
+
+    addCreature('creature-eevow-small', S, (g) => {
+      // Brown fox/dog body
+      g.fillStyle(0xBB8844); g.fillRect(9,12,14,12);
+      g.fillStyle(0xCC9955); g.fillRect(11,14,10,8);
+      // Big fluffy collar
+      g.fillStyle(0xF0E0C8); g.fillRect(6,10,20,6);
+      g.fillStyle(0xFFEED8); g.fillRect(8,11,16,4);
+      // Head
+      g.fillStyle(0xBB8844); g.fillRect(8,2,16,12);
+      g.fillStyle(0xCC9955); g.fillRect(10,4,12,8);
+      // Big ears
+      g.fillStyle(0xBB8844); g.fillRect(5,0,6,8); g.fillRect(21,0,6,8);
+      g.fillStyle(0x886633); g.fillRect(6,1,4,5); g.fillRect(22,1,4,5);
+      // Eyes
+      g.fillStyle(0x442200); g.fillRect(12,6,3,3); g.fillRect(17,6,3,3);
+      g.fillStyle(0xFFFFFF); g.fillRect(13,6,1,1); g.fillRect(18,6,1,1);
+      // Nose
+      g.fillStyle(0x222222); g.fillRect(14,10,4,2);
+      // Wedding veil on head!
+      g.fillStyle(0xFFFFFF); g.fillRect(10,0,12,3);
+      g.fillStyle(0xEEEEFF); g.fillRect(22,1,5,10);
+      g.fillStyle(0xDDDDFF); g.fillRect(24,6,4,12);
+      // Bushy tail
+      g.fillStyle(0xBB8844); g.fillRect(22,8,6,5);
+      g.fillStyle(0xF0E0C8); g.fillRect(23,9,5,3);
+      // Feet
+      g.fillStyle(0x886633); g.fillRect(10,24,4,4); g.fillRect(18,24,4,4);
+    });
+
+    addCreature('creature-squirtcake-small', S, (g) => {
+      // Blue turtle
+      g.fillStyle(0x6699CC); g.fillRect(9,14,14,10);
+      // Shell (with cake on top!)
+      g.fillStyle(0x886633); g.fillRect(10,10,12,8);
+      g.fillStyle(0x996644); g.fillRect(11,11,10,6);
+      // Cake on shell
+      g.fillStyle(0xF8F0E8); g.fillRect(12,5,8,7);
+      g.fillStyle(0xFF8888); g.fillRect(12,5,8,1); g.fillRect(14,3,4,3);
+      g.fillStyle(0xFF4444); g.fillRect(15,1,2,3);
+      // Head
+      g.fillStyle(0x6699CC); g.fillRect(4,14,8,8);
+      g.fillStyle(0x77AADD); g.fillRect(5,15,6,6);
+      // Eyes
+      g.fillStyle(0x000000); g.fillRect(6,17,2,2);
+      g.fillStyle(0xFFFFFF); g.fillRect(6,17,1,1);
+      // Mouth
+      g.fillStyle(0x4477AA); g.fillRect(5,20,3,1);
+      // Arms
+      g.fillStyle(0x6699CC); g.fillRect(3,18,3,3); g.fillRect(22,16,4,3);
+      // Legs
+      g.fillRect(10,24,4,4); g.fillRect(18,24,4,4);
+      // Tail
+      g.fillStyle(0x77AADD); g.fillRect(23,18,4,3); g.fillRect(25,16,3,3);
+    });
+
+    addCreature('creature-bulbasnog-small', S, (g) => {
+      // Green body
+      g.fillStyle(0x66AA88); g.fillRect(8,16,16,10);
+      g.fillStyle(0x77BB99); g.fillRect(10,17,12,7);
+      // Head
+      g.fillStyle(0x66AA88); g.fillRect(6,10,14,10);
+      g.fillStyle(0x77BB99); g.fillRect(8,12,10,6);
+      // Eyes
+      g.fillStyle(0xFF2222); g.fillRect(10,13,3,3); g.fillRect(15,13,3,3);
+      g.fillStyle(0x000000); g.fillRect(11,14,1,1); g.fillRect(16,14,1,1);
+      // Mouth
+      g.fillStyle(0x448866); g.fillRect(12,18,4,1);
+      // Flower bouquet on back!
+      g.fillStyle(0x228811); g.fillRect(14,6,6,10);
+      g.fillStyle(0xFF6688); g.fillRect(12,2,4,5); g.fillRect(18,3,4,4);
+      g.fillStyle(0xFFAACC); g.fillRect(14,1,4,4);
+      g.fillStyle(0xFFFFFF); g.fillRect(11,5,3,3); g.fillRect(20,4,3,3);
+      g.fillStyle(0xFFDD44); g.fillRect(16,0,2,3);
+      // Dark spots
+      g.fillStyle(0x448866); g.fillRect(10,20,3,2); g.fillRect(19,19,3,2);
+      // Legs
+      g.fillStyle(0x66AA88); g.fillRect(9,26,4,4); g.fillRect(19,26,4,4);
+      g.fillStyle(0x558877); g.fillRect(9,28,4,2); g.fillRect(19,28,4,2);
+    });
+
+    // Create a single atlas canvas with all creatures in a grid
+    const rows = Math.ceil(creatureDrawFns.length / cols);
+    const atlasW = cols * S;
+    const atlasH = rows * S;
+    const atlas = this.textures.createCanvas('creature-atlas', atlasW, atlasH);
+    const ctx = atlas.context;
+
+    creatureDrawFns.forEach((c, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      this.drawCreatureOnAtlas(ctx, col * S, row * S, c.drawFn);
+    });
+    atlas.refresh();
+
+    // Add named frame regions so each creature can be referenced by key
+    const texture = this.textures.get('creature-atlas');
+    creatureDrawFns.forEach((c, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      texture.add(c.key, 0, col * S, row * S, S, S);
+      // Also register as a standalone texture alias for compatibility
+      // We'll reference them as ('creature-atlas', 'creature-xxx-small')
     });
   }
 
@@ -1068,62 +1553,52 @@ class BootScene extends Phaser.Scene {
   }
 
   generateBadgeSprites() {
+    // All badges on a single atlas: 5 badges x 16px = 80x16
     const S = 16;
-    const badges = [
-      { key: 'badge-bouquet', color1: 0xFF6688, color2: 0xFF88AA },
-      { key: 'badge-trivia', color1: 0x4488FF, color2: 0x66AAFF },
-      { key: 'badge-ring', color1: 0xFFD700, color2: 0xFFEE88 },
-      { key: 'badge-memory', color1: 0xAA66CC, color2: 0xCC88EE },
+    const badgeDefs = [
+      { key: 'badge-bouquet', c1: '#FF6688', c2: '#FF88AA' },
+      { key: 'badge-trivia', c1: '#4488FF', c2: '#66AAFF' },
+      { key: 'badge-ring', c1: '#FFD700', c2: '#FFEE88' },
+      { key: 'badge-memory', c1: '#AA66CC', c2: '#CC88EE' },
+      { key: 'badge-locked', c1: '#555555', c2: '#666666' },
     ];
 
-    badges.forEach(b => {
-      const g = this.make.graphics({ x: 0, y: 0, add: false });
-      g.fillStyle(b.color1);
-      g.fillRect(4, 1, 8, 14);
-      g.fillRect(1, 4, 14, 8);
-      g.fillRect(2, 2, 12, 12);
-      g.fillStyle(b.color2);
-      g.fillRect(5, 4, 6, 8);
-      g.fillRect(4, 5, 8, 6);
-      g.fillStyle(0xFFFFFF);
-      g.fillRect(6, 6, 4, 4);
-      g.generateTexture(b.key, S, S);
-      g.destroy();
-    });
+    const atlas = this.textures.createCanvas('badge-atlas', badgeDefs.length * S, S);
+    const ctx = atlas.context;
 
-    // Locked badge
-    const g = this.make.graphics({ x: 0, y: 0, add: false });
-    g.fillStyle(0x555555);
-    g.fillRect(4, 1, 8, 14);
-    g.fillRect(1, 4, 14, 8);
-    g.fillRect(2, 2, 12, 12);
-    g.fillStyle(0x666666);
-    g.fillRect(5, 4, 6, 8);
-    g.fillRect(4, 5, 8, 6);
-    g.fillStyle(0x777777);
-    g.fillRect(6, 6, 4, 4);
-    g.generateTexture('badge-locked', S, S);
-    g.destroy();
+    badgeDefs.forEach((b, i) => {
+      const ox = i * S;
+      ctx.fillStyle = b.c1;
+      ctx.fillRect(ox+4, 1, 8, 14); ctx.fillRect(ox+1, 4, 14, 8); ctx.fillRect(ox+2, 2, 12, 12);
+      ctx.fillStyle = b.c2;
+      ctx.fillRect(ox+5, 4, 6, 8); ctx.fillRect(ox+4, 5, 8, 6);
+      ctx.fillStyle = (b.key === 'badge-locked') ? '#777777' : '#FFFFFF';
+      ctx.fillRect(ox+6, 6, 4, 4);
+    });
+    atlas.refresh();
+
+    // Add frame references
+    const tex = this.textures.get('badge-atlas');
+    badgeDefs.forEach((b, i) => {
+      tex.add(b.key, 0, i * S, 0, S, S);
+    });
   }
 
   generateBattlePlatforms() {
-    // Player platform
-    const g1 = this.make.graphics({ x: 0, y: 0, add: false });
-    g1.fillStyle(0x4a8c3f);
-    g1.fillRect(8, 4, 64, 12);
-    g1.fillRect(4, 6, 72, 8);
-    g1.fillStyle(0x3a7c2f);
-    g1.fillRect(10, 8, 60, 8);
-    g1.generateTexture('battle-platform-player', 80, 20);
-    g1.destroy();
+    const pp = this.textures.createCanvas('battle-platform-player', 80, 20);
+    const pc = pp.context;
+    pc.fillStyle = '#4a8c3f';
+    pc.fillRect(8, 4, 64, 12); pc.fillRect(4, 6, 72, 8);
+    pc.fillStyle = '#3a7c2f';
+    pc.fillRect(10, 8, 60, 8);
+    pp.refresh();
 
-    // Enemy platform
-    const g2 = this.make.graphics({ x: 0, y: 0, add: false });
-    g2.fillStyle(0x4a8c3f);
-    g2.fillRect(6, 3, 52, 10);
-    g2.fillStyle(0x3a7c2f);
-    g2.fillRect(8, 7, 48, 6);
-    g2.generateTexture('battle-platform-enemy', 64, 16);
-    g2.destroy();
+    const ep = this.textures.createCanvas('battle-platform-enemy', 64, 16);
+    const ec = ep.context;
+    ec.fillStyle = '#4a8c3f';
+    ec.fillRect(6, 3, 52, 10);
+    ec.fillStyle = '#3a7c2f';
+    ec.fillRect(8, 7, 48, 6);
+    ep.refresh();
   }
 }

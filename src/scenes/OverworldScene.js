@@ -56,6 +56,7 @@ class OverworldScene extends Phaser.Scene {
     // Creature encounter spots on the map
     this.creatureSpots = [];
     this.createCreatureEncounters();
+    this.createAmbientCreatures();
 
     // Quest log
     this.questLog = new QuestLog(this, this.questManager);
@@ -604,8 +605,76 @@ class OverworldScene extends Phaser.Scene {
       { id: 'dancelf', name: 'Dancelf', type: 'Fairy', spriteKey: 'creature-dancelf', description: 'A tiny dancer that appears at joyful celebrations.' },
       { id: 'toastini', name: 'Toastini', type: 'Bubbly', spriteKey: 'creature-toastini', description: 'A champagne glass creature that fizzes with excitement.' },
       { id: 'confettail', name: 'Confettail', type: 'Party', spriteKey: 'creature-confettail', description: 'A festive fox whose tail bursts with colorful confetti.' },
+      { id: 'pikawedding', name: 'Pikawedding', type: 'Electric', spriteKey: 'creature-pikawedding', description: 'A cheerful yellow mouse wearing a bow tie for the occasion!' },
+      { id: 'jigglybell', name: 'Jigglybell', type: 'Normal', spriteKey: 'creature-jigglybell', description: 'A pink singer that rings wedding bells with its beautiful voice.' },
+      { id: 'eevow', name: 'Eevow', type: 'Normal', spriteKey: 'creature-eevow', description: 'A fluffy companion wearing a tiny wedding veil. So precious!' },
+      { id: 'squirtcake', name: 'Squirtcake', type: 'Water', spriteKey: 'creature-squirtcake', description: 'A blue turtle carrying a slice of wedding cake on its shell.' },
+      { id: 'bulbasnog', name: 'Bulbasnog', type: 'Grass', spriteKey: 'creature-bulbasnog', description: 'A green creature with a beautiful flower bouquet growing on its back.' },
     ];
     this.pokedexManager.loadCreatures(creatures);
+  }
+
+  createAmbientCreatures() {
+    const T = GAME_CONFIG.TILE_SIZE;
+    this.ambientCreatures = [];
+
+    // Pokemon-inspired creatures wandering the map
+    const wanderers = [
+      { spriteKey: 'creature-pikawedding-small', tileX: 12, tileY: 18, patrolRadius: 3 },
+      { spriteKey: 'creature-jigglybell-small', tileX: 6, tileY: 10, patrolRadius: 2 },
+      { spriteKey: 'creature-eevow-small', tileX: 20, tileY: 8, patrolRadius: 3 },
+      { spriteKey: 'creature-squirtcake-small', tileX: 18, tileY: 20, patrolRadius: 2 },
+      { spriteKey: 'creature-bulbasnog-small', tileX: 3, tileY: 16, patrolRadius: 2 },
+      // Some wedding creatures also wander
+      { spriteKey: 'creature-dovelett-small', tileX: 14, tileY: 4, patrolRadius: 4 },
+      { spriteKey: 'creature-dancelf-small', tileX: 22, tileY: 12, patrolRadius: 2 },
+    ];
+
+    wanderers.forEach(w => {
+      const sprite = this.add.image(w.tileX * T, w.tileY * T, 'tileset', w.spriteKey);
+      sprite.setDepth(4);
+      sprite.setScale(0.6); // 32x32 scaled down to ~19px to fit tiles
+
+      const homeX = w.tileX * T;
+      const homeY = w.tileY * T;
+      const radius = w.patrolRadius * T;
+
+      // Wandering tween - random patrol around home position
+      const wanderTween = () => {
+        const newX = homeX + Phaser.Math.Between(-radius, radius);
+        const newY = homeY + Phaser.Math.Between(-radius, radius);
+        // Clamp to map bounds
+        const clampedX = Phaser.Math.Clamp(newX, T, (GAME_CONFIG.MAP_WIDTH - 1) * T);
+        const clampedY = Phaser.Math.Clamp(newY, T, (GAME_CONFIG.MAP_HEIGHT - 1) * T);
+
+        // Flip sprite based on direction
+        sprite.setFlipX(clampedX < sprite.x);
+
+        this.tweens.add({
+          targets: sprite,
+          x: clampedX,
+          y: clampedY,
+          duration: Phaser.Math.Between(2000, 4000),
+          ease: 'Sine.easeInOut',
+          delay: Phaser.Math.Between(500, 3000),
+          onComplete: () => {
+            // Small bounce/idle animation
+            this.tweens.add({
+              targets: sprite,
+              y: sprite.y - 2,
+              duration: 200,
+              yoyo: true,
+              onComplete: wanderTween,
+            });
+          }
+        });
+      };
+
+      // Start with random delay so they don't all move in sync
+      this.time.delayedCall(Phaser.Math.Between(0, 2000), wanderTween);
+
+      this.ambientCreatures.push({ sprite, ...w });
+    });
   }
 
   createCreatureEncounters() {
@@ -620,24 +689,47 @@ class OverworldScene extends Phaser.Scene {
       { id: 'spot-confettail', creatureId: 'confettail', tileX: 8, tileY: 15 },
       { id: 'spot-cakemon', creatureId: 'cakemon', tileX: 25, tileY: 11 },
       { id: 'spot-ringbear', creatureId: 'ringbear', tileX: 15, tileY: 22 },
+      // Pokemon-inspired encounters
+      { id: 'spot-pikawedding', creatureId: 'pikawedding', tileX: 10, tileY: 19 },
+      { id: 'spot-jigglybell', creatureId: 'jigglybell', tileX: 6, tileY: 8 },
+      { id: 'spot-eevow', creatureId: 'eevow', tileX: 19, tileY: 10 },
+      { id: 'spot-squirtcake', creatureId: 'squirtcake', tileX: 20, tileY: 21 },
+      { id: 'spot-bulbasnog', creatureId: 'bulbasnog', tileX: 2, tileY: 14 },
     ];
 
     spots.forEach(spot => {
-      // Add a subtle sparkle on the tile
-      const sparkle = this.add.image(spot.tileX * T, spot.tileY * T, 'sparkle');
+      // Show the creature sprite on the map (visible, not just a sparkle)
+      const creatureSpriteKey = 'creature-' + spot.creatureId + '-small';
+      const creatureImg = this.add.image(spot.tileX * T, spot.tileY * T, 'tileset', creatureSpriteKey);
+      creatureImg.setDepth(4);
+      creatureImg.setScale(0.5);
+
+      // Gentle bobbing animation
+      this.tweens.add({
+        targets: creatureImg,
+        y: spot.tileY * T - 3,
+        duration: 1000 + Math.random() * 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      // Also add sparkle underneath
+      const sparkle = this.add.image(spot.tileX * T, spot.tileY * T + 4, 'sparkle');
       sparkle.setDepth(3);
-      sparkle.setAlpha(0.4);
-      sparkle.setScale(0.7);
+      sparkle.setAlpha(0.3);
+      sparkle.setScale(0.5);
       this.tweens.add({
         targets: sparkle,
-        alpha: 0.15,
-        duration: 1200,
+        alpha: 0.1,
+        duration: 800,
         yoyo: true,
         repeat: -1,
       });
 
       this.creatureSpots.push({
         ...spot,
+        sprite: creatureImg,
         sparkle,
         active: true,
       });
@@ -650,6 +742,7 @@ class OverworldScene extends Phaser.Scene {
       if (spot) {
         spot.active = false;
         if (spot.sparkle) spot.sparkle.setVisible(false);
+        if (spot.sprite) spot.sprite.setVisible(false);
       }
     });
   }
@@ -662,6 +755,7 @@ class OverworldScene extends Phaser.Scene {
         // Trigger encounter!
         spot.active = false;
         if (spot.sparkle) spot.sparkle.setVisible(false);
+        if (spot.sprite) spot.sprite.setVisible(false);
 
         const creature = this.pokedexManager.getCreature(spot.creatureId);
         if (creature && this.pokedexManager.discover(spot.creatureId)) {

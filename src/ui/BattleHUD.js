@@ -43,8 +43,8 @@ class BattleHUD {
     this.container.add(text);
 
     // Show creature sliding in
-    const creature = this.scene.add.image(this.W + 48, this.H/2 + 20, creatureKey + '-small');
-    creature.setScale(4);
+    const creature = this.scene.add.image(this.W + 48, this.H/2 + 20, 'tileset', creatureKey + '-small');
+    creature.setScale(2);
     this.container.add(creature);
 
     this.scene.tweens.add({
@@ -71,8 +71,8 @@ class BattleHUD {
     this.container.add(ePlat);
 
     // Enemy creature (using small sprite scaled up)
-    this.enemySprite = this.scene.add.image(this.W - 56, 36, enemyCreature.spriteKey + '-small');
-    this.enemySprite.setScale(3);
+    this.enemySprite = this.scene.add.image(this.W - 56, 36, 'tileset', enemyCreature.spriteKey + '-small');
+    this.enemySprite.setScale(1.5);
     this.container.add(this.enemySprite);
 
     // Player platform (bottom-left)
@@ -80,8 +80,8 @@ class BattleHUD {
     this.container.add(pPlat);
 
     // Player creature (using small sprite scaled up, flipped for back view)
-    this.playerSprite = this.scene.add.image(56, 104, playerCreature.spriteKey + '-small');
-    this.playerSprite.setScale(3.5);
+    this.playerSprite = this.scene.add.image(56, 104, 'tileset', playerCreature.spriteKey + '-small');
+    this.playerSprite.setScale(1.8);
     this.playerSprite.setFlipX(true);
     this.container.add(this.playerSprite);
 
@@ -346,7 +346,7 @@ class BattleHUD {
         fontSize: '9px', color: '#f8d848', fontFamily: 'monospace', fontStyle: 'bold',
       }).setOrigin(0.5));
 
-      const badge = this.scene.add.image(this.W/2, 148, results.badgeEarned);
+      const badge = this.scene.add.image(this.W/2, 148, 'tileset', results.badgeEarned);
       badge.setScale(1.5);
       this.container.add(badge);
 
@@ -382,8 +382,8 @@ class BattleHUD {
         this.container.add(this.scene.add.rectangle(this.W/2, this.H/2, this.W, this.H, 0x2a4a2e));
 
         // Creature
-        const sprite = this.scene.add.image(this.W/2, this.H/2 - 10, creatureKey + '-small');
-        sprite.setScale(5);
+        const sprite = this.scene.add.image(this.W/2, this.H/2 - 10, 'tileset', creatureKey + '-small');
+        sprite.setScale(3);
         sprite.setAlpha(0);
         this.container.add(sprite);
 

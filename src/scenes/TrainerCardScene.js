@@ -36,7 +36,7 @@ class TrainerCardScene extends Phaser.Scene {
     });
 
     // Companion creature
-    this.add.image(68, 70, 'creature-ringbear-small');
+    this.add.image(68, 70, 'creature-atlas', 'creature-ringbear-small');
     this.add.text(82, 67, 'Partner: Ringbear', {
       fontSize: '6px', color: '#c0c0c0', fontFamily: 'monospace',
     });
@@ -96,7 +96,7 @@ class TrainerCardScene extends Phaser.Scene {
       const earned = this.badgeManager.hasBadge(badge.id);
       const spriteKey = earned ? badge.spriteKey : 'badge-locked';
 
-      const img = this.add.image(bx, statsY + 12, spriteKey);
+      const img = this.add.image(bx, statsY + 12, 'tileset', spriteKey);
       img.setScale(1.2);
 
       // Badge name
