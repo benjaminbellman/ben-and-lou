@@ -96,7 +96,7 @@ class TrainerCardScene extends Phaser.Scene {
       const earned = this.badgeManager.hasBadge(badge.id);
       const spriteKey = earned ? badge.spriteKey : 'badge-locked';
 
-      const img = this.add.image(bx, statsY + 12, 'tileset', spriteKey);
+      const img = this.add.image(bx, statsY + 12, 'badge-atlas', spriteKey);
       img.setScale(1.2);
 
       // Badge name

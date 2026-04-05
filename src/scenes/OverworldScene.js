@@ -631,9 +631,9 @@ class OverworldScene extends Phaser.Scene {
     ];
 
     wanderers.forEach(w => {
-      const sprite = this.add.image(w.tileX * T, w.tileY * T, 'tileset', w.spriteKey);
+      const sprite = this.add.image(w.tileX * T, w.tileY * T, 'creature-atlas', w.spriteKey);
       sprite.setDepth(4);
-      sprite.setScale(0.6); // 32x32 scaled down to ~19px to fit tiles
+      sprite.setScale(0.5); // 32x32 scaled to 16px to fit tiles
 
       const homeX = w.tileX * T;
       const homeY = w.tileY * T;
@@ -700,7 +700,7 @@ class OverworldScene extends Phaser.Scene {
     spots.forEach(spot => {
       // Show the creature sprite on the map (visible, not just a sparkle)
       const creatureSpriteKey = 'creature-' + spot.creatureId + '-small';
-      const creatureImg = this.add.image(spot.tileX * T, spot.tileY * T, 'tileset', creatureSpriteKey);
+      const creatureImg = this.add.image(spot.tileX * T, spot.tileY * T, 'creature-atlas', creatureSpriteKey);
       creatureImg.setDepth(4);
       creatureImg.setScale(0.5);
 

@@ -43,7 +43,7 @@ class BattleHUD {
     this.container.add(text);
 
     // Show creature sliding in
-    const creature = this.scene.add.image(this.W + 48, this.H/2 + 20, 'tileset', creatureKey + '-small');
+    const creature = this.scene.add.image(this.W + 48, this.H/2 + 20, 'creature-atlas', creatureKey + '-small');
     creature.setScale(2);
     this.container.add(creature);
 
@@ -71,8 +71,8 @@ class BattleHUD {
     this.container.add(ePlat);
 
     // Enemy creature (using small sprite scaled up)
-    this.enemySprite = this.scene.add.image(this.W - 56, 36, 'tileset', enemyCreature.spriteKey + '-small');
-    this.enemySprite.setScale(1.5);
+    this.enemySprite = this.scene.add.image(this.W - 56, 36, 'creature-atlas', enemyCreature.spriteKey + '-small');
+    this.enemySprite.setScale(2);
     this.container.add(this.enemySprite);
 
     // Player platform (bottom-left)
@@ -80,8 +80,8 @@ class BattleHUD {
     this.container.add(pPlat);
 
     // Player creature (using small sprite scaled up, flipped for back view)
-    this.playerSprite = this.scene.add.image(56, 104, 'tileset', playerCreature.spriteKey + '-small');
-    this.playerSprite.setScale(1.8);
+    this.playerSprite = this.scene.add.image(56, 104, 'creature-atlas', playerCreature.spriteKey + '-small');
+    this.playerSprite.setScale(2.5);
     this.playerSprite.setFlipX(true);
     this.container.add(this.playerSprite);
 
@@ -225,8 +225,6 @@ class BattleHUD {
   }
 
   showAttackAnimation(correct, attackerIsPlayer, message, onComplete) {
-    // Show attack message
-    const msgY = this.H - 52;
     // Clear bottom area
     const msgBg = this.scene.add.rectangle(this.W/2, this.H - 28, this.W, 56, 0x1a1a3e, 0.95);
     msgBg.setStrokeStyle(2, 0xc8b060);
@@ -238,32 +236,87 @@ class BattleHUD {
     }).setOrigin(0.5);
     this.container.add(msgText);
 
-    // Shake the creature that takes damage
+    // Attacker lunges forward
+    const attacker = attackerIsPlayer ? this.playerSprite : this.enemySprite;
     const target = attackerIsPlayer ? this.enemySprite : this.playerSprite;
-    if (target) {
-      // Flash white
+    if (attacker) {
+      const origX = attacker.x;
+      const origY = attacker.y;
+      const lungeX = attackerIsPlayer ? origX + 12 : origX - 12;
+      const lungeY = attackerIsPlayer ? origY - 8 : origY + 8;
       this.scene.tweens.add({
-        targets: target,
-        alpha: 0.3,
-        duration: 80,
+        targets: attacker,
+        x: lungeX, y: lungeY,
+        duration: 150,
         yoyo: true,
-        repeat: 3,
-        onComplete: () => {
-          target.alpha = 1;
-        }
+        ease: 'Quad.easeIn',
       });
     }
+
+    // Target takes hit - flash + shake
+    if (target) {
+      this.scene.time.delayedCall(200, () => {
+        // Flash white
+        this.scene.tweens.add({
+          targets: target,
+          alpha: 0.2,
+          duration: 60,
+          yoyo: true,
+          repeat: 4,
+          onComplete: () => { target.alpha = 1; }
+        });
+        // Shake target
+        const origX = target.x;
+        this.scene.tweens.add({
+          targets: target,
+          x: origX + 3,
+          duration: 40,
+          yoyo: true,
+          repeat: 5,
+          onComplete: () => { target.x = origX; }
+        });
+      });
+    }
+
+    // Screen shake on hit
+    this.scene.time.delayedCall(200, () => {
+      this.scene.cameras.main.shake(200, correct ? 0.01 : 0.005);
+    });
+
+    // Spawn star/heart particles on hit
+    this.scene.time.delayedCall(250, () => {
+      if (target) {
+        for (let i = 0; i < 5; i++) {
+          const px = target.x + Phaser.Math.Between(-16, 16);
+          const py = target.y + Phaser.Math.Between(-16, 8);
+          const particleChar = correct ? '\u2605' : '\u2661';
+          const particleColor = correct ? '#f8d848' : '#ff6688';
+          const p = this.scene.add.text(px, py, particleChar, {
+            fontSize: '8px', color: particleColor, fontFamily: 'monospace',
+          }).setOrigin(0.5).setDepth(20);
+          this.container.add(p);
+          this.scene.tweens.add({
+            targets: p,
+            y: py - 20 - Phaser.Math.Between(0, 15),
+            alpha: 0,
+            duration: 600 + Phaser.Math.Between(0, 300),
+            ease: 'Quad.easeOut',
+            onComplete: () => p.destroy(),
+          });
+        }
+      }
+    });
 
     // Effectiveness text
     const effText = correct ? "It's super effective!" : "It's not very effective...";
     const effColor = correct ? '#40c040' : '#c08040';
 
-    this.scene.time.delayedCall(600, () => {
+    this.scene.time.delayedCall(700, () => {
       msgText.setText(effText);
       msgText.setColor(effColor);
     });
 
-    this.scene.time.delayedCall(1400, () => {
+    this.scene.time.delayedCall(1500, () => {
       if (onComplete) onComplete();
     });
   }
@@ -346,7 +399,7 @@ class BattleHUD {
         fontSize: '9px', color: '#f8d848', fontFamily: 'monospace', fontStyle: 'bold',
       }).setOrigin(0.5));
 
-      const badge = this.scene.add.image(this.W/2, 148, 'tileset', results.badgeEarned);
+      const badge = this.scene.add.image(this.W/2, 148, 'badge-atlas', results.badgeEarned);
       badge.setScale(1.5);
       this.container.add(badge);
 
@@ -382,16 +435,16 @@ class BattleHUD {
         this.container.add(this.scene.add.rectangle(this.W/2, this.H/2, this.W, this.H, 0x2a4a2e));
 
         // Creature
-        const sprite = this.scene.add.image(this.W/2, this.H/2 - 10, 'tileset', creatureKey + '-small');
-        sprite.setScale(3);
+        const sprite = this.scene.add.image(this.W/2, this.H/2 - 10, 'creature-atlas', creatureKey + '-small');
+        sprite.setScale(2.5);
         sprite.setAlpha(0);
         this.container.add(sprite);
 
         this.scene.tweens.add({
           targets: sprite,
           alpha: 1,
-          scaleX: 2.5,
-          scaleY: 2.5,
+          scaleX: 2,
+          scaleY: 2,
           duration: 500,
           ease: 'Back.easeOut',
         });

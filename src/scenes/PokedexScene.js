@@ -63,8 +63,8 @@ class PokedexScene extends Phaser.Scene {
 
       if (isDiscovered) {
         // Show creature sprite
-        const sprite = this.add.image(cx, cy + 6, 'tileset', creature.spriteKey + '-small');
-        sprite.setScale(1.5);
+        const sprite = this.add.image(cx, cy + 6, 'creature-atlas', creature.spriteKey + '-small');
+        sprite.setScale(0.8);
 
         // Name
         this.add.text(cx, cy + 24, creature.name, {

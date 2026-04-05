@@ -20,9 +20,8 @@ class BootScene extends Phaser.Scene {
   }
 
   create() {
-    // Generate creature/badge/platform textures using add.graphics + generateTexture
-    // This works in create() and doesn't block preload()
-    const S = 16;
+    // Generate detailed 32x32 creature sprites
+    const S = 32;
     const cols = 4;
     const creatureKeys = [
       'creature-ringbear-small', 'creature-bouquettle-small', 'creature-cakemon-small', 'creature-veileon-small',
@@ -30,14 +29,11 @@ class BootScene extends Phaser.Scene {
       'creature-pikawedding-small', 'creature-jigglybell-small', 'creature-eevow-small', 'creature-squirtcake-small',
       'creature-bulbasnog-small',
     ];
-    const creatureColors = [
-      [0x8B6914, 0xA07818, 0xFFD700], [0x44AA33, 0x66BB55, 0xFF6688],
-      [0xF8F0E8, 0xFFE0D0, 0xFF8888], [0xE8E0F0, 0xF0E8F8, 0x6644AA],
-      [0xF0F0F0, 0xE8E8E8, 0xFF6688], [0xFFB8D8, 0xFFD0E0, 0xFFD700],
-      [0xDDEEFF, 0xCCDDEE, 0xFFDD44], [0xFF8844, 0xFFAA66, 0xFFDD44],
-      [0xFFDD44, 0xFFEE66, 0xFF4444], [0xFFAACC, 0xFFBBDD, 0x44CCAA],
-      [0xBB8844, 0xCC9955, 0xF0E0C8], [0x6699CC, 0x77AADD, 0xF8F0E8],
-      [0x66AA88, 0x77BB99, 0xFF6688],
+    const drawFns = [
+      this.drawCreatureRingbear, this.drawCreatureBouquettle, this.drawCreatureCakemon, this.drawCreatureVeileon,
+      this.drawCreatureDovelett, this.drawCreatureDancelf, this.drawCreatureToastini, this.drawCreatureConfettail,
+      this.drawCreaturePikawedding, this.drawCreatureJigglybell, this.drawCreatureEevow, this.drawCreatureSquirtcake,
+      this.drawCreatureBulbasnog,
     ];
 
     const rows = Math.ceil(creatureKeys.length / cols);
@@ -45,17 +41,7 @@ class BootScene extends Phaser.Scene {
     creatureKeys.forEach((key, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const ox = col * S;
-      const oy = row * S;
-      const c = creatureColors[i];
-      g.fillStyle(c[0]); g.fillRect(ox+4, oy+5, 8, 7);
-      g.fillStyle(c[1]); g.fillRect(ox+3, oy+1, 10, 6);
-      g.fillStyle(0x000000); g.fillRect(ox+5, oy+3, 2, 2); g.fillRect(ox+9, oy+3, 2, 2);
-      g.fillStyle(0xFFFFFF); g.fillRect(ox+5, oy+3, 1, 1); g.fillRect(ox+9, oy+3, 1, 1);
-      g.fillStyle(c[2]); g.fillRect(ox+2, oy+0, 3, 3); g.fillRect(ox+11, oy+0, 3, 3);
-      g.fillStyle(c[2]); g.fillRect(ox+6, oy+6, 4, 2);
-      g.fillStyle(c[0]); g.fillRect(ox+4, oy+12, 3, 3); g.fillRect(ox+9, oy+12, 3, 3);
-      g.fillStyle(0x000000); g.fillRect(ox+7, oy+5, 2, 1);
+      drawFns[i](g, col * S, row * S);
     });
     g.generateTexture('creature-atlas', cols * S, rows * S);
     g.destroy();
@@ -606,6 +592,366 @@ class BootScene extends Phaser.Scene {
     ctx.fillRect(x + 4, y + 2, 8, 4);
     ctx.fillStyle = '#ffdd44';
     ctx.fillRect(x + 6, y + 3, 4, 2);
+  }
+
+  // --- Detailed 32x32 creature sprite draw methods ---
+
+  drawCreatureRingbear(g, ox, oy) {
+    // Brown bear holding golden wedding rings
+    g.fillStyle(0x8B6914); g.fillRect(ox+10, oy+4, 12, 14); // body
+    g.fillStyle(0xA07818); g.fillRect(ox+12, oy+6, 8, 10);  // body highlight
+    g.fillStyle(0x8B6914); g.fillRect(ox+8, oy+2, 6, 6); g.fillRect(ox+18, oy+2, 6, 6); // ears
+    g.fillStyle(0xC49A28); g.fillRect(ox+9, oy+3, 4, 4); g.fillRect(ox+19, oy+3, 4, 4); // inner ears
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+8, 3, 3); g.fillRect(ox+19, oy+8, 3, 3); // eyes
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+8, 2, 2); g.fillRect(ox+19, oy+8, 2, 2); // eye shine
+    g.fillStyle(0x442200); g.fillRect(ox+15, oy+11, 2, 2); // nose
+    g.fillStyle(0x000000); g.fillRect(ox+14, oy+13, 4, 1); // mouth
+    g.fillStyle(0xA07818); g.fillRect(ox+13, oy+14, 6, 2); // muzzle
+    g.fillStyle(0x8B6914); g.fillRect(ox+7, oy+12, 4, 8); g.fillRect(ox+21, oy+12, 4, 8); // arms
+    g.fillStyle(0x8B6914); g.fillRect(ox+10, oy+18, 5, 6); g.fillRect(ox+17, oy+18, 5, 6); // legs
+    g.fillStyle(0x6B5010); g.fillRect(ox+10, oy+24, 5, 3); g.fillRect(ox+17, oy+24, 5, 3); // feet
+    // Golden ring held in paws
+    g.fillStyle(0xFFD700); g.fillRect(ox+13, oy+18, 6, 2); g.fillRect(ox+12, oy+19, 2, 3); g.fillRect(ox+18, oy+19, 2, 3);
+    g.fillStyle(0xFFE84D); g.fillRect(ox+13, oy+22, 6, 1);
+    // Belly patch
+    g.fillStyle(0xC49A28); g.fillRect(ox+13, oy+15, 6, 4);
+  }
+
+  drawCreatureBouquettle(g, ox, oy) {
+    // Green turtle with flower bouquet on shell
+    g.fillStyle(0x44AA33); g.fillRect(ox+8, oy+14, 16, 10); // shell
+    g.fillStyle(0x338822); g.fillRect(ox+10, oy+16, 12, 6); // shell dark
+    g.fillStyle(0x55CC44); g.fillRect(ox+11, oy+15, 4, 3); g.fillRect(ox+17, oy+15, 4, 3); // shell pattern
+    g.fillStyle(0x66BB55); g.fillRect(ox+12, oy+12, 8, 4); // shell top
+    g.fillStyle(0x44AA33); g.fillRect(ox+6, oy+18, 4, 4); g.fillRect(ox+22, oy+18, 4, 4); // feet
+    g.fillStyle(0x55BB44); g.fillRect(ox+10, oy+24, 4, 4); g.fillRect(ox+18, oy+24, 4, 4); // back feet
+    // Head
+    g.fillStyle(0x66BB55); g.fillRect(ox+4, oy+14, 6, 6); // head
+    g.fillStyle(0x000000); g.fillRect(ox+5, oy+16, 2, 2); // eye
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+5, oy+16, 1, 1);
+    g.fillStyle(0x000000); g.fillRect(ox+4, oy+19, 2, 1); // mouth
+    // Flowers on shell (bouquet)
+    g.fillStyle(0xFF6688); g.fillRect(ox+11, oy+8, 4, 4); g.fillRect(ox+17, oy+9, 3, 3);
+    g.fillStyle(0xFFDD44); g.fillRect(ox+14, oy+6, 4, 4); g.fillRect(ox+12, oy+10, 2, 2);
+    g.fillStyle(0xFF88AA); g.fillRect(ox+19, oy+7, 3, 3); g.fillRect(ox+10, oy+6, 3, 3);
+    g.fillStyle(0x44AA33); g.fillRect(ox+13, oy+10, 6, 3); // stems
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+15, oy+5, 3, 3); // white flower
+  }
+
+  drawCreatureCakemon(g, ox, oy) {
+    // Living wedding cake with eyes and cherry on top
+    g.fillStyle(0xF8F0E8); g.fillRect(ox+6, oy+16, 20, 8); // bottom tier
+    g.fillStyle(0xFFE0D0); g.fillRect(ox+8, oy+18, 16, 4);  // bottom detail
+    g.fillStyle(0xF8F0E8); g.fillRect(ox+9, oy+10, 14, 7);  // middle tier
+    g.fillStyle(0xFFE0D0); g.fillRect(ox+11, oy+12, 10, 3); // middle detail
+    g.fillStyle(0xF8F0E8); g.fillRect(ox+12, oy+5, 8, 6);   // top tier
+    g.fillStyle(0xFFE0D0); g.fillRect(ox+13, oy+6, 6, 4);   // top detail
+    // Frosting drips
+    g.fillStyle(0xFF8888); g.fillRect(ox+6, oy+16, 20, 2); g.fillRect(ox+9, oy+10, 14, 2); g.fillRect(ox+12, oy+5, 8, 2);
+    g.fillStyle(0xFFAABB); g.fillRect(ox+8, oy+17, 2, 2); g.fillRect(ox+22, oy+17, 2, 2); // drip details
+    // Eyes on middle tier
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+13, 3, 3); g.fillRect(ox+19, oy+13, 3, 3);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+13, 2, 2); g.fillRect(ox+19, oy+13, 2, 2);
+    g.fillStyle(0x000000); g.fillRect(ox+15, oy+15, 4, 1); // smile
+    // Cherry on top
+    g.fillStyle(0xFF4444); g.fillRect(ox+14, oy+2, 4, 4);
+    g.fillStyle(0xFF6666); g.fillRect(ox+15, oy+2, 2, 2);
+    g.fillStyle(0x44AA33); g.fillRect(ox+15, oy+0, 2, 3); // stem
+    // Feet
+    g.fillStyle(0xDDCCBB); g.fillRect(ox+9, oy+24, 5, 4); g.fillRect(ox+18, oy+24, 5, 4);
+  }
+
+  drawCreatureVeileon(g, ox, oy) {
+    // Ethereal purple veil creature
+    g.fillStyle(0x9966CC); g.fillRect(ox+10, oy+8, 12, 12); // body
+    g.fillStyle(0xAA77DD); g.fillRect(ox+12, oy+10, 8, 8);  // body highlight
+    g.fillStyle(0xBB88EE); g.fillRect(ox+11, oy+4, 10, 6);  // head
+    g.fillStyle(0xCC99FF); g.fillRect(ox+13, oy+5, 6, 4);   // head highlight
+    // Eyes (elegant, narrow)
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+7, 3, 2); g.fillRect(ox+19, oy+7, 3, 2);
+    g.fillStyle(0xDDAAFF); g.fillRect(ox+13, oy+7, 1, 1); g.fillRect(ox+20, oy+7, 1, 1);
+    // Flowing veil from head
+    g.fillStyle(0xE8D0FF); g.fillRect(ox+8, oy+2, 16, 4); // veil top
+    g.fillStyle(0xDDCCEE); g.fillRect(ox+6, oy+4, 4, 8); g.fillRect(ox+22, oy+4, 4, 8); // veil sides
+    g.fillStyle(0xE8D0FF); g.fillRect(ox+4, oy+8, 4, 10); g.fillRect(ox+24, oy+8, 4, 10); // veil flowing
+    g.fillStyle(0xF0E0FF); g.fillRect(ox+5, oy+12, 2, 6); g.fillRect(ox+25, oy+12, 2, 6); // veil ends
+    // Sparkle on veil
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+7, oy+3, 1, 1); g.fillRect(ox+24, oy+5, 1, 1); g.fillRect(ox+10, oy+1, 1, 1);
+    // Legs
+    g.fillStyle(0x8855BB); g.fillRect(ox+12, oy+20, 4, 6); g.fillRect(ox+18, oy+20, 4, 6);
+    g.fillStyle(0x7744AA); g.fillRect(ox+12, oy+26, 4, 3); g.fillRect(ox+18, oy+26, 4, 3);
+    // Gem on forehead
+    g.fillStyle(0xFFDD44); g.fillRect(ox+15, oy+4, 2, 2);
+  }
+
+  drawCreatureDovelett(g, ox, oy) {
+    // White dove with pink heart
+    g.fillStyle(0xF0F0F0); g.fillRect(ox+10, oy+10, 12, 10); // body
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+11, 8, 8);   // body highlight
+    g.fillStyle(0xF0F0F0); g.fillRect(ox+12, oy+6, 8, 6);    // head
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+13, oy+7, 6, 4);
+    // Eye
+    g.fillStyle(0x000000); g.fillRect(ox+14, oy+8, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+14, oy+8, 1, 1);
+    // Beak
+    g.fillStyle(0xFFAA44); g.fillRect(ox+19, oy+9, 4, 2);
+    g.fillStyle(0xFF8833); g.fillRect(ox+20, oy+11, 2, 1);
+    // Wings
+    g.fillStyle(0xE8E8E8); g.fillRect(ox+4, oy+8, 8, 8);   // left wing
+    g.fillStyle(0xDDDDDD); g.fillRect(ox+4, oy+10, 6, 4);   // wing detail
+    g.fillStyle(0xE8E8E8); g.fillRect(ox+20, oy+8, 8, 8);   // right wing
+    g.fillStyle(0xDDDDDD); g.fillRect(ox+22, oy+10, 6, 4);
+    // Wing tips
+    g.fillStyle(0xCCCCCC); g.fillRect(ox+2, oy+7, 3, 3); g.fillRect(ox+27, oy+7, 3, 3);
+    // Tail
+    g.fillStyle(0xE8E8E8); g.fillRect(ox+8, oy+18, 4, 4);
+    g.fillStyle(0xDDDDDD); g.fillRect(ox+6, oy+20, 3, 4);
+    // Pink heart on chest
+    g.fillStyle(0xFF6688); g.fillRect(ox+13, oy+13, 2, 2); g.fillRect(ox+17, oy+13, 2, 2);
+    g.fillStyle(0xFF6688); g.fillRect(ox+14, oy+15, 4, 2); g.fillRect(ox+15, oy+17, 2, 1);
+    // Feet
+    g.fillStyle(0xFFAA44); g.fillRect(ox+12, oy+20, 3, 3); g.fillRect(ox+17, oy+20, 3, 3);
+  }
+
+  drawCreatureDancelf(g, ox, oy) {
+    // Pink fairy dancer with sparkle wand
+    g.fillStyle(0xFFB8D8); g.fillRect(ox+12, oy+10, 8, 10); // body (dress)
+    g.fillStyle(0xFFD0E0); g.fillRect(ox+13, oy+12, 6, 6);  // dress highlight
+    g.fillStyle(0xFFB8D8); g.fillRect(ox+10, oy+18, 12, 3); // skirt flare
+    g.fillStyle(0xFFA0C8); g.fillRect(ox+9, oy+19, 14, 2);  // skirt ruffle
+    // Head
+    g.fillStyle(0xFFDDE8); g.fillRect(ox+12, oy+4, 8, 7);
+    g.fillStyle(0xFFEEF0); g.fillRect(ox+13, oy+5, 6, 5);
+    // Eyes (big, sparkly)
+    g.fillStyle(0x000000); g.fillRect(ox+13, oy+7, 3, 3); g.fillRect(ox+18, oy+7, 3, 3);
+    g.fillStyle(0x44CCAA); g.fillRect(ox+14, oy+7, 2, 2); g.fillRect(ox+19, oy+7, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+14, oy+7, 1, 1); g.fillRect(ox+19, oy+7, 1, 1);
+    // Mouth
+    g.fillStyle(0xFF6688); g.fillRect(ox+16, oy+10, 2, 1);
+    // Wings
+    g.fillStyle(0xFFDD44); g.fillRect(ox+6, oy+8, 5, 6); g.fillRect(ox+23, oy+8, 5, 6);
+    g.fillStyle(0xFFEE88); g.fillRect(ox+7, oy+9, 3, 4); g.fillRect(ox+24, oy+9, 3, 4);
+    // Hair/crown
+    g.fillStyle(0xFFDD44); g.fillRect(ox+13, oy+2, 6, 3); // tiara
+    g.fillStyle(0xFFEE66); g.fillRect(ox+15, oy+1, 2, 2); // tiara gem
+    // Wand
+    g.fillStyle(0xFFDD44); g.fillRect(ox+24, oy+12, 2, 8); // wand stick
+    g.fillStyle(0xFFFF00); g.fillRect(ox+23, oy+10, 4, 3); // star top
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+24, oy+11, 2, 1); // star shine
+    // Legs/feet
+    g.fillStyle(0xFFDDE8); g.fillRect(ox+13, oy+21, 3, 5); g.fillRect(ox+18, oy+21, 3, 5);
+    g.fillStyle(0xFF88BB); g.fillRect(ox+13, oy+25, 3, 3); g.fillRect(ox+18, oy+25, 3, 3); // shoes
+  }
+
+  drawCreatureToastini(g, ox, oy) {
+    // Champagne glass creature with bubbles
+    g.fillStyle(0xDDEEFF); g.fillRect(ox+10, oy+4, 12, 12); // glass bowl
+    g.fillStyle(0xEEF4FF); g.fillRect(ox+12, oy+6, 8, 8);   // glass highlight
+    g.fillStyle(0xFFDD44); g.fillRect(ox+11, oy+8, 10, 8);   // champagne
+    g.fillStyle(0xFFEE66); g.fillRect(ox+12, oy+9, 8, 6);    // champagne highlight
+    // Bubbles
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+13, oy+9, 2, 2); g.fillRect(ox+18, oy+11, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+15, oy+7, 1, 1); g.fillRect(ox+17, oy+5, 1, 1); g.fillRect(ox+13, oy+5, 1, 1);
+    // Glass rim
+    g.fillStyle(0xCCDDEE); g.fillRect(ox+9, oy+4, 14, 2);
+    // Eyes on glass
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+10, 2, 2); g.fillRect(ox+18, oy+10, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+10, 1, 1); g.fillRect(ox+18, oy+10, 1, 1);
+    g.fillStyle(0xFF6688); g.fillRect(ox+15, oy+13, 2, 1); // smile
+    // Stem
+    g.fillStyle(0xCCDDEE); g.fillRect(ox+15, oy+16, 2, 6);
+    // Base
+    g.fillStyle(0xCCDDEE); g.fillRect(ox+11, oy+22, 10, 2);
+    g.fillStyle(0xBBCCDD); g.fillRect(ox+12, oy+24, 8, 2);
+    // Arms (tiny)
+    g.fillStyle(0xDDEEFF); g.fillRect(ox+7, oy+10, 3, 4); g.fillRect(ox+22, oy+10, 3, 4);
+    // Little feet
+    g.fillStyle(0xBBCCDD); g.fillRect(ox+11, oy+26, 4, 3); g.fillRect(ox+17, oy+26, 4, 3);
+  }
+
+  drawCreatureConfettail(g, ox, oy) {
+    // Orange fox with colorful confetti tail
+    g.fillStyle(0xFF8844); g.fillRect(ox+10, oy+10, 10, 10); // body
+    g.fillStyle(0xFFAA66); g.fillRect(ox+12, oy+12, 6, 6);   // body highlight
+    g.fillStyle(0xFF8844); g.fillRect(ox+10, oy+5, 10, 7);   // head
+    g.fillStyle(0xFFAA66); g.fillRect(ox+12, oy+7, 6, 4);    // face
+    // Ears
+    g.fillStyle(0xFF8844); g.fillRect(ox+9, oy+2, 4, 5); g.fillRect(ox+17, oy+2, 4, 5);
+    g.fillStyle(0xFFCC88); g.fillRect(ox+10, oy+3, 2, 3); g.fillRect(ox+18, oy+3, 2, 3);
+    // Eyes
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+8, 2, 2); g.fillRect(ox+17, oy+8, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+8, 1, 1); g.fillRect(ox+17, oy+8, 1, 1);
+    g.fillStyle(0x000000); g.fillRect(ox+14, oy+10, 2, 1); // nose
+    g.fillStyle(0xFFCC88); g.fillRect(ox+13, oy+11, 4, 2); // muzzle
+    // Legs
+    g.fillStyle(0xFF7733); g.fillRect(ox+10, oy+20, 4, 5); g.fillRect(ox+16, oy+20, 4, 5);
+    g.fillStyle(0xFF6622); g.fillRect(ox+10, oy+25, 4, 3); g.fillRect(ox+16, oy+25, 4, 3);
+    // CONFETTI TAIL (big, colorful!)
+    g.fillStyle(0xFF8844); g.fillRect(ox+20, oy+10, 4, 4);  // tail base
+    g.fillStyle(0xFFAA66); g.fillRect(ox+23, oy+7, 5, 6);   // tail mid
+    g.fillStyle(0xFF6688); g.fillRect(ox+26, oy+4, 3, 3);   // confetti pink
+    g.fillStyle(0x44CCAA); g.fillRect(ox+24, oy+3, 3, 3);   // confetti teal
+    g.fillStyle(0xFFDD44); g.fillRect(ox+27, oy+7, 3, 3);   // confetti yellow
+    g.fillStyle(0x6688FF); g.fillRect(ox+25, oy+10, 3, 2);  // confetti blue
+    g.fillStyle(0xFF4444); g.fillRect(ox+28, oy+5, 2, 2);   // confetti red
+    g.fillStyle(0xAAFF44); g.fillRect(ox+26, oy+1, 2, 2);   // confetti green
+  }
+
+  drawCreaturePikawedding(g, ox, oy) {
+    // Yellow electric mouse with pointy ears, red cheeks, bow tie
+    // Ears
+    g.fillStyle(0x222222); g.fillRect(ox+6, oy+0, 4, 3); g.fillRect(ox+22, oy+0, 4, 3);
+    g.fillStyle(0xFFDD44); g.fillRect(ox+6, oy+2, 4, 5); g.fillRect(ox+22, oy+2, 4, 5);
+    // Head
+    g.fillStyle(0xFFDD44); g.fillRect(ox+8, oy+5, 16, 12);
+    g.fillStyle(0xFFEE66); g.fillRect(ox+10, oy+7, 12, 8);
+    // Eyes
+    g.fillStyle(0x000000); g.fillRect(ox+11, oy+9, 4, 4); g.fillRect(ox+19, oy+9, 4, 4);
+    g.fillStyle(0x441100); g.fillRect(ox+12, oy+10, 2, 2); g.fillRect(ox+20, oy+10, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+9, 2, 2); g.fillRect(ox+20, oy+9, 2, 2);
+    // Red cheeks
+    g.fillStyle(0xFF4444); g.fillRect(ox+7, oy+11, 4, 3); g.fillRect(ox+23, oy+11, 4, 3);
+    // Nose + mouth
+    g.fillStyle(0x000000); g.fillRect(ox+15, oy+12, 2, 1);
+    g.fillStyle(0xCC8833); g.fillRect(ox+14, oy+14, 4, 1);
+    // Body
+    g.fillStyle(0xFFDD44); g.fillRect(ox+10, oy+17, 12, 8);
+    g.fillStyle(0xFFEE66); g.fillRect(ox+12, oy+18, 8, 6);
+    // Bow tie
+    g.fillStyle(0xFF2222); g.fillRect(ox+12, oy+17, 3, 3); g.fillRect(ox+17, oy+17, 3, 3);
+    g.fillStyle(0xCC0000); g.fillRect(ox+15, oy+18, 2, 2);
+    // Arms
+    g.fillStyle(0xFFDD44); g.fillRect(ox+7, oy+19, 3, 5); g.fillRect(ox+22, oy+19, 3, 5);
+    // Feet
+    g.fillStyle(0xCC9922); g.fillRect(ox+10, oy+25, 5, 4); g.fillRect(ox+17, oy+25, 5, 4);
+    // Lightning bolt tail
+    g.fillStyle(0xCC9922); g.fillRect(ox+24, oy+14, 3, 2);
+    g.fillStyle(0xCC9922); g.fillRect(ox+26, oy+12, 3, 2);
+    g.fillStyle(0xCC9922); g.fillRect(ox+24, oy+10, 3, 2);
+    g.fillStyle(0xFFDD44); g.fillRect(ox+26, oy+8, 3, 3);
+  }
+
+  drawCreatureJigglybell(g, ox, oy) {
+    // Round pink creature with big blue eyes, curly tuft, bell
+    // Body (round)
+    g.fillStyle(0xFFAACC); g.fillRect(ox+7, oy+8, 18, 16);
+    g.fillStyle(0xFFBBDD); g.fillRect(ox+9, oy+10, 14, 12);
+    g.fillStyle(0xFFAACC); g.fillRect(ox+9, oy+6, 14, 6); // top roundness
+    g.fillStyle(0xFFBBDD); g.fillRect(ox+11, oy+7, 10, 4);
+    // Big eyes
+    g.fillStyle(0x44CCAA); g.fillRect(ox+10, oy+12, 5, 5); g.fillRect(ox+17, oy+12, 5, 5);
+    g.fillStyle(0x66DDBB); g.fillRect(ox+11, oy+13, 3, 3); g.fillRect(ox+18, oy+13, 3, 3);
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+13, 2, 3); g.fillRect(ox+19, oy+13, 2, 3);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+13, 1, 1); g.fillRect(ox+19, oy+13, 1, 1);
+    // Small mouth
+    g.fillStyle(0xFF6688); g.fillRect(ox+15, oy+18, 2, 1);
+    // Curly hair tuft
+    g.fillStyle(0xFF88BB); g.fillRect(ox+14, oy+2, 4, 5);
+    g.fillStyle(0xFF99CC); g.fillRect(ox+13, oy+3, 2, 3); g.fillRect(ox+19, oy+3, 2, 3);
+    g.fillStyle(0xFF77AA); g.fillRect(ox+15, oy+1, 2, 2);
+    // Arms
+    g.fillStyle(0xFFAACC); g.fillRect(ox+4, oy+14, 4, 5); g.fillRect(ox+24, oy+14, 4, 5);
+    // Feet
+    g.fillStyle(0xFF88BB); g.fillRect(ox+10, oy+24, 5, 4); g.fillRect(ox+17, oy+24, 5, 4);
+    // Wedding bell held
+    g.fillStyle(0xFFDD44); g.fillRect(ox+25, oy+12, 4, 4);
+    g.fillStyle(0xFFEE66); g.fillRect(ox+26, oy+11, 2, 2);
+    g.fillStyle(0xCC9922); g.fillRect(ox+26, oy+16, 2, 1);
+  }
+
+  drawCreatureEevow(g, ox, oy) {
+    // Brown fox with cream fluffy collar, big eyes, wedding veil
+    // Body
+    g.fillStyle(0xBB8844); g.fillRect(ox+10, oy+12, 12, 10);
+    g.fillStyle(0xCC9955); g.fillRect(ox+12, oy+14, 8, 6);
+    // Head
+    g.fillStyle(0xBB8844); g.fillRect(ox+9, oy+5, 14, 9);
+    g.fillStyle(0xCC9955); g.fillRect(ox+11, oy+7, 10, 5);
+    // Big ears
+    g.fillStyle(0xBB8844); g.fillRect(ox+6, oy+1, 5, 7); g.fillRect(ox+21, oy+1, 5, 7);
+    g.fillStyle(0xAA7733); g.fillRect(ox+7, oy+2, 3, 5); g.fillRect(ox+22, oy+2, 3, 5);
+    // Big dark eyes
+    g.fillStyle(0x000000); g.fillRect(ox+11, oy+8, 4, 4); g.fillRect(ox+18, oy+8, 4, 4);
+    g.fillStyle(0x442200); g.fillRect(ox+12, oy+9, 2, 2); g.fillRect(ox+19, oy+9, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+8, 2, 2); g.fillRect(ox+19, oy+8, 2, 2);
+    // Nose
+    g.fillStyle(0x442200); g.fillRect(ox+15, oy+11, 2, 1);
+    // Cream fluffy collar/neck ruff
+    g.fillStyle(0xF0E0C8); g.fillRect(ox+8, oy+12, 16, 4);
+    g.fillStyle(0xE8D8B8); g.fillRect(ox+9, oy+13, 14, 2);
+    g.fillStyle(0xF0E0C8); g.fillRect(ox+7, oy+11, 3, 3); g.fillRect(ox+22, oy+11, 3, 3);
+    // Fluffy tail
+    g.fillStyle(0xF0E0C8); g.fillRect(ox+22, oy+14, 6, 6);
+    g.fillStyle(0xE8D8B8); g.fillRect(ox+23, oy+15, 4, 4);
+    g.fillStyle(0xF0E0C8); g.fillRect(ox+24, oy+12, 4, 3);
+    // Legs
+    g.fillStyle(0xAA7733); g.fillRect(ox+11, oy+22, 4, 5); g.fillRect(ox+17, oy+22, 4, 5);
+    g.fillStyle(0x996622); g.fillRect(ox+11, oy+26, 4, 2); g.fillRect(ox+17, oy+26, 4, 2);
+    // Wedding veil on head
+    g.fillStyle(0xF8F0FF); g.fillRect(ox+11, oy+0, 10, 3);
+    g.fillStyle(0xF0E8FF); g.fillRect(ox+21, oy+1, 3, 6);
+    g.fillStyle(0xF8F0FF); g.fillRect(ox+23, oy+4, 2, 5);
+  }
+
+  drawCreatureSquirtcake(g, ox, oy) {
+    // Blue turtle with brown shell and cake slice on head
+    // Shell
+    g.fillStyle(0x997755); g.fillRect(ox+9, oy+12, 14, 10);
+    g.fillStyle(0xAA8866); g.fillRect(ox+11, oy+14, 10, 6);
+    g.fillStyle(0x886644); g.fillRect(ox+12, oy+13, 3, 3); g.fillRect(ox+17, oy+13, 3, 3); // shell pattern
+    g.fillStyle(0x886644); g.fillRect(ox+14, oy+17, 4, 3); // shell center
+    // Body/head
+    g.fillStyle(0x6699CC); g.fillRect(ox+10, oy+6, 12, 8);
+    g.fillStyle(0x77AADD); g.fillRect(ox+12, oy+7, 8, 6);
+    // Eyes
+    g.fillStyle(0x000000); g.fillRect(ox+12, oy+8, 3, 3); g.fillRect(ox+18, oy+8, 3, 3);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+12, oy+8, 2, 2); g.fillRect(ox+18, oy+8, 2, 2);
+    // Mouth (smile)
+    g.fillStyle(0x000000); g.fillRect(ox+15, oy+12, 2, 1);
+    g.fillStyle(0x5588BB); g.fillRect(ox+14, oy+13, 4, 1);
+    // Arms
+    g.fillStyle(0x6699CC); g.fillRect(ox+6, oy+12, 4, 5); g.fillRect(ox+22, oy+12, 4, 5);
+    // Tail
+    g.fillStyle(0x6699CC); g.fillRect(ox+5, oy+18, 5, 3);
+    g.fillStyle(0x77AADD); g.fillRect(ox+3, oy+19, 3, 3);
+    // Legs
+    g.fillStyle(0x6699CC); g.fillRect(ox+10, oy+22, 5, 5); g.fillRect(ox+17, oy+22, 5, 5);
+    g.fillStyle(0x5588BB); g.fillRect(ox+10, oy+26, 5, 2); g.fillRect(ox+17, oy+26, 5, 2);
+    // Cake slice on head!
+    g.fillStyle(0xF8F0E8); g.fillRect(ox+12, oy+1, 8, 5); // cake
+    g.fillStyle(0xFF8888); g.fillRect(ox+12, oy+1, 8, 2);  // frosting
+    g.fillStyle(0xFF4444); g.fillRect(ox+15, oy+0, 2, 2);  // cherry
+  }
+
+  drawCreatureBulbasnog(g, ox, oy) {
+    // Green creature with flower bouquet growing on back
+    // Body
+    g.fillStyle(0x66AA88); g.fillRect(ox+8, oy+14, 16, 10);
+    g.fillStyle(0x77BB99); g.fillRect(ox+10, oy+16, 12, 6);
+    // Darker spots
+    g.fillStyle(0x559977); g.fillRect(ox+10, oy+15, 3, 3); g.fillRect(ox+18, oy+17, 3, 3);
+    g.fillStyle(0x559977); g.fillRect(ox+14, oy+19, 4, 2);
+    // Head
+    g.fillStyle(0x66AA88); g.fillRect(ox+6, oy+10, 10, 8);
+    g.fillStyle(0x77BB99); g.fillRect(ox+7, oy+12, 8, 4);
+    // Eyes (red)
+    g.fillStyle(0xFF2222); g.fillRect(ox+8, oy+12, 3, 3); g.fillRect(ox+13, oy+12, 3, 3);
+    g.fillStyle(0xFF6644); g.fillRect(ox+9, oy+12, 2, 2); g.fillRect(ox+14, oy+12, 2, 2);
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+9, oy+12, 1, 1); g.fillRect(ox+14, oy+12, 1, 1);
+    // Mouth
+    g.fillStyle(0x448866); g.fillRect(ox+9, oy+16, 4, 1);
+    // Legs
+    g.fillStyle(0x559977); g.fillRect(ox+8, oy+24, 5, 4); g.fillRect(ox+19, oy+24, 5, 4);
+    g.fillStyle(0x448866); g.fillRect(ox+8, oy+27, 5, 2); g.fillRect(ox+19, oy+27, 5, 2);
+    // FLOWER BOUQUET on back (the main feature!)
+    g.fillStyle(0x44AA33); g.fillRect(ox+14, oy+10, 10, 6); // leaves/stems
+    g.fillStyle(0x55BB44); g.fillRect(ox+16, oy+8, 6, 4);   // more leaves
+    g.fillStyle(0xFF6688); g.fillRect(ox+15, oy+5, 4, 4);   // pink flower
+    g.fillStyle(0xFFDD44); g.fillRect(ox+20, oy+6, 3, 3);   // yellow flower
+    g.fillStyle(0xFF88AA); g.fillRect(ox+18, oy+3, 3, 3);   // light pink flower
+    g.fillStyle(0xFFFFFF); g.fillRect(ox+22, oy+4, 3, 3);   // white flower
+    g.fillStyle(0xFF4444); g.fillRect(ox+16, oy+2, 2, 2);   // red flower
+    g.fillStyle(0xFFEE44); g.fillRect(ox+16, oy+6, 2, 2); g.fillRect(ox+21, oy+7, 2, 2); // flower centers
   }
 
   generateCharacterSprite(key, colors) {
